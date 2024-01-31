@@ -217,13 +217,17 @@ public class projectgroup4 {
         });
 		//logout button
         logout.addActionListener(new ActionListener() {
-        	public void actionPerformed(ActionEvent e) {
-        		isLoggedIn = false;
-        		updateProfileButtonState();
-        		JOptionPane.showMessageDialog(homeFrame, "Successfully logged out");
-        		 }
-    	});
+    public void actionPerformed(ActionEvent e) {
+        int confirmation = JOptionPane.showConfirmDialog(homeFrame,
+                "Are you sure you want to log out?", "Confirmation", JOptionPane.YES_NO_OPTION);
 
+        if (confirmation == JOptionPane.YES_OPTION) {
+            isLoggedIn = false;
+            updateProfileButtonState();
+            JOptionPane.showMessageDialog(homeFrame, "Successfully logged out");
+        }
+    }
+});
     	//user
     	profile.addActionListener(new ActionListener() {
     		public void actionPerformed(ActionEvent e) {
