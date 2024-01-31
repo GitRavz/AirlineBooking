@@ -1,0 +1,916 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.sql.*;
+import java.awt.Font;
+import java.awt.Color;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+public class projectgroup4 {
+
+    private JFrame homeFrame;
+    private boolean isLoggedIn = false; //track login status
+    private JButton profile;
+    private JButton logout;
+    private String loggedInUserEmail;
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            new projectgroup4().showHomePage();
+        });
+    }
+
+
+	//BOOKINGS
+    private void showUserBookings(String userEmail) {
+    try {
+        String url = "jdbc:mysql://localhost:3306/mydb";
+        String username = "root";
+        String password = "";
+
+        Class.forName("com.mysql.cj.jdbc.Driver");
+
+        try (Connection connection = DriverManager.getConnection(url, username, password)) {
+            String selectQuery = "SELECT * FROM bookings WHERE user_email = ?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(selectQuery)) {
+                preparedStatement.setString(1, userEmail);
+
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    // Create a new JFrame to display user bookings
+                    JFrame frame = new JFrame("User Bookings");
+                    frame.setSize(600, 400);
+                    frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+                    // Create a JPanel to hold the booking information
+                    JPanel panel = new JPanel();
+                    panel.setBackground(new Color(140,216,255));
+                    panel.setLayout(new GridLayout(0, 2));
+
+                    boolean hasBookedFlights = false;
+
+                    while (resultSet.next()) {
+                        int bookingId =  resultSet.getInt("booking_id");
+                        String flightId = resultSet.getString("flight_id");
+                        String departure = resultSet.getString("departure_location");
+                        String destination = resultSet.getString("destination_location");
+                        String date = resultSet.getString("flight_date");
+                        String cost = resultSet.getString("cost");
+
+                        // Display booking information in labels
+                        JLabel labelBookingId = new JLabel("Booking ID: " + bookingId);
+                        JLabel labelFlightId = new JLabel("Flight ID: " + flightId);
+                        JLabel labelDeparture = new JLabel("Departure: " + departure);
+                        JLabel labelDestination = new JLabel("Destination: " + destination);
+                        JLabel labelDate = new JLabel("Date: " + date);
+                        JLabel labelCost = new JLabel("Cost: " + cost);
+
+                        // Add labels to the panel
+                        panel.add(labelBookingId);
+                        panel.add(labelFlightId);
+                        panel.add(labelDeparture);
+                        panel.add(labelDestination);
+                        panel.add(labelDate);
+                        panel.add(labelCost);
+                        hasBookedFlights = true;
+                    }
+
+                    // Add the panel to the frame
+                    frame.add(panel);
+
+                    if (hasBookedFlights) {
+                        JButton cancelButton = new JButton("Cancel Booking");
+                        cancelButton.addActionListener(new ActionListener() {
+                            @Override
+                            public void actionPerformed(ActionEvent e) {
+                                int selectedBookingId = Integer.parseInt(JOptionPane.showInputDialog(frame, "Enter Booking ID to cancel:"));
+
+                                // Implement the cancel booking logic (you may want to verify the booking ID)
+                                if (cancelBooking(selectedBookingId)) {
+                                    JOptionPane.showMessageDialog(frame, "Booking canceled successfully.");
+                                    frame.dispose(); // Close the current frame
+                                    showUserBookings(userEmail); // Reopen the frame
+                                } else {
+                                    JOptionPane.showMessageDialog(frame, "Please input the correct Book ID and try again.");
+                                }
+                            }
+                        });
+                        panel.add(cancelButton);
+                    } else {
+    // If no booked flights, display a message using JOptionPane
+    JOptionPane.showMessageDialog(frame, "No booked flights found.", "No Bookings", JOptionPane.INFORMATION_MESSAGE);
+}
+
+                    // Center the frame on the screen
+                    frame.setLocationRelativeTo(null);
+
+                    // Set the frame visibility to true
+                    frame.setVisible(true);
+                }
+            }
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}
+
+
+	//HOME PAGE
+   private void showHomePage() {
+    // Main/Home Frame
+    homeFrame = new JFrame("Airline Booking System");
+
+    JButton registerButton = new JButton("Register");
+    JButton loginButton = new JButton("Login");
+    JButton flightsButton = new JButton("Flights");
+    JButton bookings = new JButton("Bookings");
+    profile = new JButton("Profile");
+    profile.setEnabled(false);
+    JButton about = new JButton("About Us");
+    logout = new JButton("Logout");
+
+    Color customColor = new Color(83,196,255);
+    Color customHoverColor = new Color(140,216,255);
+
+    registerButton.setBackground(customColor);
+    loginButton.setBackground(customColor);
+    flightsButton.setBackground(customColor);
+    bookings.setBackground(customColor);
+    profile.setBackground(customColor);
+    about.setBackground(customColor);
+    logout.setBackground(customColor);
+
+    addHoverEffect(registerButton, customHoverColor);
+    addHoverEffect(loginButton, customHoverColor);
+    addHoverEffect(flightsButton, customHoverColor);
+    addHoverEffect(bookings, customHoverColor);
+    addHoverEffect(profile, customHoverColor);
+    addHoverEffect(about, customHoverColor);
+    addHoverEffect(logout, customHoverColor);
+
+    logout.setEnabled(false); // Initially disabled until the user logs in
+
+    JLabel mainTextLabel = new JLabel("Your Experience Starts Here!");
+
+    Font labelFont = new Font("Script MT Bold", Font.BOLD, 50);
+    mainTextLabel.setFont(labelFont);
+
+    mainTextLabel.setForeground(Color.WHITE); // title color
+
+    JLabel servicesText = new JLabel("<html><p style='text-align: center; font-size: 18px;'>Explore Our Services!<br/>"
+            + "Book your flights with ease and explore amazing destinations with Nigga Airlines. "
+            + "Enjoy comfortable travel and exceptional service!</p></html>");
+    servicesText.setForeground(Color.BLACK);
+    Font servicesFont = new Font("Sitka Heading", Font.BOLD, 11);
+    servicesText.setFont(servicesFont);
+    servicesText.setForeground(Color.WHITE);
+
+    ImageIcon backgroundImage = new ImageIcon("C:/Users/Ravz/Documents/JCreator LE/MyProjects/projectgroup4/air1.jpg");
+    JLabel backgroundLabel = new JLabel(backgroundImage);
+    backgroundLabel.setLayout(null);  // Set layout to null for absolute positioning
+    backgroundLabel.setBounds(0, 0, backgroundImage.getIconWidth(), backgroundImage.getIconHeight());  // Set the size to match the image size
+
+    homeFrame.setContentPane(backgroundLabel);
+
+    // Set positions for components
+    mainTextLabel.setBounds(160, 60, 800, 100);
+    servicesText.setBounds(130, 400, 700, 100);
+    registerButton.setBounds(140, 150, 100, 25);
+    loginButton.setBounds(240, 150, 100, 25);
+    flightsButton.setBounds(340, 150, 100, 25);
+    bookings.setBounds(440, 150, 100, 25);
+    about.setBounds(540, 150, 100, 25);
+    profile.setBounds(640, 150, 100, 25);
+    logout.setBounds(740, 150, 100, 25);
+
+    homeFrame.setLayout(null);
+    homeFrame.setSize(backgroundImage.getIconWidth(), backgroundImage.getIconHeight());  // Set frame size to match the image size
+    homeFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    homeFrame.setLocationRelativeTo(null);
+
+    // ADD
+    homeFrame.add(loginButton);
+    homeFrame.add(registerButton);
+    homeFrame.add(flightsButton);
+    homeFrame.add(bookings);
+    homeFrame.add(profile);
+    homeFrame.add(about);
+    homeFrame.add(logout);
+    homeFrame.add(servicesText);
+    homeFrame.add(mainTextLabel);
+
+    homeFrame.setVisible(true);
+
+        // Registration button functions and frame
+        registerButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent a) {
+                showRegistrationForm();
+            }
+        });
+		// Login button functions and frame
+        loginButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent a) {
+                showLoginPage();
+            }
+        });
+		//logout button
+        logout.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+        		isLoggedIn = false;
+        		updateProfileButtonState();
+        		JOptionPane.showMessageDialog(homeFrame, "Successfully logged out");
+        		 }
+    	});
+
+    	//user
+    	profile.addActionListener(new ActionListener() {
+    		public void actionPerformed(ActionEvent e) {
+    			if (isLoggedIn) {
+            showUserProfile();
+        } 		else {
+            JOptionPane.showMessageDialog(homeFrame, "Please log in first.");
+        }
+    }
+});
+
+        flightsButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent a) {
+                showFlightsTable();
+            }
+        });
+
+        bookings.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent a) {
+                if (isLoggedIn) {
+                    showUserBookings(loggedInUserEmail);
+                } else {
+                    JOptionPane.showMessageDialog(homeFrame, "Please log in to view bookings.");
+                }
+            }
+        });
+
+       homeFrame.setVisible(true);
+
+    }
+   private void addHoverEffect(JButton button, Color hoverColor) {
+    Color originalColor = button.getBackground(); // Store the original color
+    button.addMouseListener(new MouseAdapter() {
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            button.setBackground(hoverColor); // Change background color on hover
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+            button.setBackground(originalColor); // Restore the original background color
+        }
+    });
+}
+	//REGISTER
+    private void showRegistrationForm() {
+        JFrame registrationFrame = new JFrame("Register");
+        registrationFrame.getContentPane().setBackground(new Color(140,216,255));
+
+        // Registration Form Components
+        JLabel lastnLabel = new JLabel("Lastname:");
+        JLabel firstnLabel = new JLabel("Firstname:");
+        JLabel addressLabel = new JLabel("Address:");
+        JLabel contactLabel = new JLabel("Contact no:");
+        JLabel emailLabel = new JLabel("Email:");
+        JLabel passwordLabel = new JLabel("Password:");
+        JLabel genderLabel = new JLabel("Gender:");
+        JLabel ageLabel = new JLabel("Age:");
+        JLabel birthdateLabel = new JLabel("Birthdate:");
+        profile.setEnabled(false);
+
+
+        //color of the labels
+        lastnLabel.setForeground(Color.WHITE);
+    	firstnLabel.setForeground(Color.WHITE);
+    	addressLabel.setForeground(Color.WHITE);
+    	contactLabel.setForeground(Color.WHITE);
+    	emailLabel.setForeground(Color.WHITE);
+    	passwordLabel.setForeground(Color.WHITE);
+    	genderLabel.setForeground(Color.WHITE);
+    	ageLabel.setForeground(Color.WHITE);
+    	birthdateLabel.setForeground(Color.WHITE);
+
+
+        JTextField lastnTextField = new JTextField();
+        JTextField firstnTextField = new JTextField();
+        JTextField addressTextField = new JTextField();
+        JTextField contactTextField = new JTextField();
+        JTextField emailTextField = new JTextField();
+        JPasswordField passwordField = new JPasswordField();
+        JComboBox<String> genderComboBox = new JComboBox<>(new String[]{"Male", "Female", "Other"});
+        JTextField ageTextField = new JTextField();
+        JTextField birthdateTextField = new JTextField();
+        JButton registerButton = new JButton("Register");
+
+
+        // Set positions for registration form components
+        lastnLabel.setBounds(10, 50, 80, 25);
+        lastnTextField.setBounds(100, 50, 165, 25);
+        firstnLabel.setBounds(10, 80, 80, 25);
+        firstnTextField.setBounds(100, 80, 165, 25);
+        addressLabel.setBounds(10, 110, 80, 25);
+        addressTextField.setBounds(100, 110, 165, 25);
+        contactLabel.setBounds(10, 140, 80, 25);
+        contactTextField.setBounds(100, 140, 165, 25);
+        emailLabel.setBounds(10, 170, 80, 25);
+        emailTextField.setBounds(100, 170, 165, 25);
+        passwordLabel.setBounds(10, 200, 80, 25);
+        passwordField.setBounds(100, 200, 165, 25);
+        genderLabel.setBounds(10, 230, 80, 25);
+        genderComboBox.setBounds(100, 230, 165, 25);
+        birthdateLabel.setBounds(10, 260, 80, 25);
+        birthdateTextField.setBounds(100, 260, 165, 25);
+        ageLabel.setBounds(10, 290, 80, 25);
+        ageTextField.setBounds(100, 290, 165, 25);
+        registerButton.setBounds(120, 330, 100, 25);
+
+
+        registrationFrame.setLayout(null);
+        registrationFrame.setBounds(575, 240, 350, 450);
+        registrationFrame.setVisible(true);
+
+        // Add registration form components to frame
+        registrationFrame.add(lastnLabel);
+        registrationFrame.add(lastnTextField);
+        registrationFrame.add(firstnLabel);
+        registrationFrame.add(firstnTextField);
+        registrationFrame.add(addressLabel);
+        registrationFrame.add(addressTextField);
+        registrationFrame.add(contactLabel);
+        registrationFrame.add(contactTextField);
+        registrationFrame.add(emailLabel);
+        registrationFrame.add(emailTextField);
+        registrationFrame.add(passwordLabel);
+        registrationFrame.add(passwordField);
+        registrationFrame.add(genderLabel);
+        registrationFrame.add(genderComboBox);
+        registrationFrame.add(birthdateLabel);
+        registrationFrame.add(birthdateTextField);
+        registrationFrame.add(ageLabel);
+    	registrationFrame.add(ageTextField);
+        registrationFrame.add(registerButton);
+
+        contactTextField.addKeyListener(new KeyAdapter() {
+        	public void keyPressed(KeyEvent e) {
+        	char c = e.getKeyChar();
+
+        // Check if the entered character is not a digit
+        if (!Character.isDigit(c)) {
+            e.consume(); // Consume the key event to prevent the character from being entered
+            JOptionPane.showMessageDialog(registrationFrame, "Please enter a valid number for contact.");
+        }
+    }
+});
+
+
+        registerButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent a) {
+                // Get the entered values
+                String enteredLastName = lastnTextField.getText();
+                String enteredFirstName = firstnTextField.getText();
+                String enteredAddress = addressTextField.getText();
+                String enteredContact = contactTextField.getText();
+                String enteredEmail = emailTextField.getText();
+                char[] enteredPassword = passwordField.getPassword();
+                String selectedGender = (String) genderComboBox.getSelectedItem();
+                String enteredBirthdate = birthdateTextField.getText();
+                String enteredAge = ageTextField.getText();
+
+                // Check if any field is empty
+                if (enteredLastName.isEmpty() || enteredFirstName.isEmpty() || enteredAddress.isEmpty() || enteredContact.isEmpty() || enteredEmail.isEmpty() || enteredPassword.length == 0 || selectedGender.isEmpty() || enteredBirthdate.isEmpty()) {
+                    JOptionPane.showMessageDialog(registrationFrame, "Please fill up all the fields");
+                    return;
+                }
+
+                // Perform registration logic
+                if (performRegistration(enteredLastName, enteredFirstName, enteredAddress, enteredContact, enteredEmail, new String(enteredPassword), selectedGender, enteredBirthdate, enteredAge)) {
+                    JOptionPane.showMessageDialog(registrationFrame, "Registration successful!");
+                    registrationFrame.dispose(); // Close the registration frame
+                } else {
+                    JOptionPane.showMessageDialog(registrationFrame, "Registration failed. Try again.");
+                }
+            }
+        });
+    }
+
+    //FLIGHTS
+     private void showFlightsTable() {
+    JFrame flightsFrame = new JFrame("Available Flights");
+    flightsFrame.getContentPane().setBackground(new Color(140,216,255));
+
+    String[] locations = {"Manila", "Cebu", "Batanes", "Bicol", "Pampanga", "Davao", "Palawan", "Iloilo", "Boracay", "Leyte", "Mindoro", "Cagayan de Oro", "Laoag", "Zamboanga", "GenSan", "Surigao", "Siargao", "Tawi-Tawi", "Tacloban", "Virac"};
+
+    JComboBox<String> departureComboBox = new JComboBox<>(locations);
+    JComboBox<String> destinationComboBox = new JComboBox<>(locations);
+
+
+	JLabel fromLabel = new JLabel("From:");
+    JLabel toLabel = new JLabel("To:");
+    JButton searchButton = new JButton("Search Flights");
+
+    // Set positions for components
+    fromLabel.setBounds(10, 20, 60, 25);
+    departureComboBox.setBounds(10, 50, 120, 25);
+    toLabel.setBounds(140, 20, 30, 25);
+    destinationComboBox.setBounds(140, 50, 120, 25);
+    searchButton.setBounds(270, 50, 120, 25);
+
+    flightsFrame.setLayout(null);
+    flightsFrame.setBounds(575, 240, 500, 250);
+    flightsFrame.setVisible(true);
+
+    // Add components to frame
+
+    flightsFrame.add(departureComboBox);
+    flightsFrame.add(fromLabel);
+    flightsFrame.add(destinationComboBox);
+    flightsFrame.add(toLabel);
+    flightsFrame.add(searchButton);
+
+    searchButton.addActionListener(new ActionListener() {
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (!isLoggedIn) {
+            JOptionPane.showMessageDialog(flightsFrame, "Please log in to search for flights.");
+            return;
+        }
+
+        String selectedDeparture = (String) departureComboBox.getSelectedItem();
+        String selectedDestination = (String) destinationComboBox.getSelectedItem();
+
+        if (selectedDeparture.equals(selectedDestination)) {
+            JOptionPane.showMessageDialog(flightsFrame, "Departure and Destination cannot be the same.");
+            return;
+        }
+
+        // Perform logic to fetch and display flights based on the selected locations
+        displayFlights(selectedDeparture, selectedDestination);
+    }
+});
+     }
+
+private boolean hasUserBookedFlight(String userEmail) {
+    try {
+        String url = "jdbc:mysql://localhost:3306/mydb";
+        String username = "root";
+        String password = "";
+
+        Class.forName("com.mysql.cj.jdbc.Driver");
+
+        try (Connection connection = DriverManager.getConnection(url, username, password)) {
+            String selectQuery = "SELECT COUNT(*) FROM bookings WHERE user_email = ?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(selectQuery)) {
+                preparedStatement.setString(1, userEmail);
+
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        int bookedFlightsCount = resultSet.getInt(1);
+                        return bookedFlightsCount > 1;
+                    }
+                }
+            }
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return false;
+}
+
+private void displayFlights(String departure, String destination) {
+    JFrame flightsInfoFrame = new JFrame("Selected Flights");
+   	flightsInfoFrame.getContentPane().setBackground(new Color(140,216,255));
+
+    String[] columnNames = {"Flight ID", "Departure", "Destination", "Date", "Cost"};
+
+    // Fetch flights from the database based on departure and destination
+    List<String[]> flightData = fetchFlightsFromDatabase(departure, destination);
+
+    Object[][] data = new Object[flightData.size()][5];
+    for (int i = 0; i < flightData.size(); i++) {
+        data[i] = flightData.get(i);
+    }
+
+    JTable flightsTable = new JTable(data, columnNames);
+    JScrollPane scrollPane = new JScrollPane(flightsTable);
+
+    JButton proceedButton = new JButton("Proceed");
+    JButton backButton = new JButton("Back");
+
+    flightsInfoFrame.setLayout(null);
+    scrollPane.setBounds(10, 10, 500, 300);
+    proceedButton.setBounds(150, 320, 100, 25);
+    backButton.setBounds(260, 320, 100, 25);
+
+    flightsInfoFrame.add(scrollPane);
+    flightsInfoFrame.add(proceedButton);
+    flightsInfoFrame.add(backButton);
+
+    flightsInfoFrame.setSize(600, 400);
+	flightsInfoFrame.setLocationRelativeTo(null); // Center the frame on the screen
+	flightsInfoFrame.setVisible(true);
+
+    backButton.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            flightsInfoFrame.dispose(); // Close the current frame (Selected Flights)
+        }
+    });
+    proceedButton.addActionListener(new ActionListener() {
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        int selectedRow = flightsTable.getSelectedRow();
+
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(flightsInfoFrame, "Please select a flight to proceed.");
+            return;
+        }
+
+        String flightId = (String) flightsTable.getValueAt(selectedRow, 0);
+        String departure = (String) flightsTable.getValueAt(selectedRow, 1);
+        String destination = (String) flightsTable.getValueAt(selectedRow, 2);
+        String date = (String) flightsTable.getValueAt(selectedRow, 3);
+        String cost = (String) flightsTable.getValueAt(selectedRow, 4);
+
+        // Assuming loggedInUserEmail is already set when the user logs in
+        if (userHasBooking(loggedInUserEmail, flightId, departure, destination, date, cost)) {
+            JOptionPane.showMessageDialog(flightsInfoFrame, "Booking successful!");
+            flightsInfoFrame.dispose(); // Close the current frame (Selected Flights)
+        } else {
+            JOptionPane.showMessageDialog(flightsInfoFrame, "Booking failed. Try again.");
+        }
+    }
+});
+}
+
+
+// Helper method to check if the user already has a booking
+private boolean userHasBooking(String userEmail, String flightId, String departure, String destination, String date, String cost) {
+    try {
+        String url = "jdbc:mysql://localhost:3306/mydb";
+        String username = "root";
+        String password = "";
+
+        Class.forName("com.mysql.cj.jdbc.Driver");
+
+        try (Connection connection = DriverManager.getConnection(url, username, password)) {
+            String insertQuery = "INSERT INTO bookings (user_email, flight_id, departure_location, destination_location, flight_date, cost) VALUES (?, ?, ?, ?, ?, ?)";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
+                preparedStatement.setString(1, userEmail);
+                preparedStatement.setString(2, flightId);
+                preparedStatement.setString(3, departure);
+                preparedStatement.setString(4, destination);
+                preparedStatement.setString(5, date);
+                preparedStatement.setString(6, cost);
+
+                int rowsAffected = preparedStatement.executeUpdate();
+
+                return rowsAffected > 0;
+            }
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+        return false;
+    }
+}
+
+
+
+
+//booking the flight
+private void bookFlight(String flightId, String departure, String destination, String date, String cost) {
+    try {
+
+        storeBookingInDatabase(loggedInUserEmail, flightId, departure, destination, date, cost);
+
+        // Display a confirmation message
+        JOptionPane.showMessageDialog(null, "Booking flight: " + flightId + "\nDeparture: " + departure
+                + "\nDestination: " + destination + "\nDate: " + date + "\nCost: " + cost);
+    } catch (Exception e) {
+        e.printStackTrace();
+        JOptionPane.showMessageDialog(null, "Error booking flight. Please try again.");
+    }
+}
+
+
+
+
+
+
+//flight database
+private List<String[]> fetchFlightsFromDatabase(String departure, String destination) {
+    List<String[]> flightData = new ArrayList<>();
+
+    try {
+        String url = "jdbc:mysql://localhost:3306/mydb";
+        String username = "root";
+        String password = "";
+
+        Class.forName("com.mysql.cj.jdbc.Driver");
+
+        try (Connection connection = DriverManager.getConnection(url, username, password)) {
+            String selectQuery = "SELECT * FROM flights WHERE departure_location=? AND destination_location=?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(selectQuery)) {
+                preparedStatement.setString(1, departure);
+                preparedStatement.setString(2, destination);
+
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    while (resultSet.next()) {
+                        String flightId = "FI-" + resultSet.getInt("flight_id");
+                        String flightDeparture = resultSet.getString("departure_location");
+                        String flightDestination = resultSet.getString("destination_location");
+                        String flightDate = resultSet.getString("flight_date");
+                        String flightCost = resultSet.getString("cost");
+
+                        String[] flightInfo = {flightId, flightDeparture, flightDestination, flightDate, flightCost};
+                        flightData.add(flightInfo);
+                    }
+                }
+            }
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return flightData;
+}
+    private void updateProfileButtonState() {
+    profile.setEnabled(isLoggedIn); //profile
+    logout.setEnabled(isLoggedIn); //logout
+}
+    //Login codes
+    private void showLoginPage() {
+        JFrame loginFrame = new JFrame("Login");
+        loginFrame.getContentPane().setBackground(new Color(140,216,255));
+
+        // Login Form Components
+        JLabel emailLabel = new JLabel("Email:");
+        JLabel passwordLabel = new JLabel("Password:");
+        JTextField emailTextField = new JTextField();
+        JPasswordField passwordField = new JPasswordField();
+        JButton loginButton = new JButton("Login");
+
+
+        // Set positions for login form components
+        emailLabel.setBounds(10, 50, 80, 25);
+        emailTextField.setBounds(100, 50, 165, 25);
+        passwordLabel.setBounds(10, 80, 80, 25);
+        passwordField.setBounds(100, 80, 165, 25);
+        loginButton.setBounds(10, 120, 80, 25);
+
+
+        loginFrame.setLayout(null);
+        loginFrame.setBounds(575, 240, 300, 200);
+        loginFrame.setVisible(true);
+
+        // Add login form components to frame
+        loginFrame.add(emailLabel);
+        loginFrame.add(emailTextField);
+        loginFrame.add(passwordLabel);
+        loginFrame.add(passwordField);
+        loginFrame.add(loginButton);
+
+
+        loginButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent a) {
+                // Get the entered values
+                String enteredEmail = emailTextField.getText();
+                char[] enteredPassword = passwordField.getPassword();
+
+                // Check if any field is empty
+                if (enteredEmail.isEmpty() || enteredPassword.length == 0) {
+                    JOptionPane.showMessageDialog(loginFrame, "Please fill up all the fields");
+                    return; // Exit the actionPerformed method to prevent further execution
+                }
+
+                // Perform login logic
+                if (performLogin(enteredEmail, new String(enteredPassword))) {
+                    JOptionPane.showMessageDialog(loginFrame, "Login successful!");
+                    isLoggedIn = true;
+                    loginFrame.dispose(); // Close the login frame or navigate to the next screen
+                    updateProfileButtonState();
+
+
+                } else {
+                    JOptionPane.showMessageDialog(loginFrame, "Login failed. Please check your email or password.");
+                }
+            }
+        });
+    }
+
+    private void storeBookingInDatabase(String userEmail, String flightId, String departure, String destination, String date, String cost) {
+    try {
+        String url = "jdbc:mysql://localhost:3306/mydb";
+        String username = "root";
+        String password = "";
+
+        Class.forName("com.mysql.cj.jdbc.Driver");
+
+        try (Connection connection = DriverManager.getConnection(url, username, password)) {
+            String insertQuery = "INSERT INTO bookings(user_email, flight_id, departure_location, destination_location, flight_date, cost) VALUES (?, ?, ?, ?, ?, ?)";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(insertQuery, Statement.RETURN_GENERATED_KEYS)) {
+                preparedStatement.setString(1, userEmail);
+                preparedStatement.setString(2, flightId);
+                preparedStatement.setString(3, departure);
+                preparedStatement.setString(4, destination);
+                preparedStatement.setString(5, date);
+                preparedStatement.setString(6, cost);
+
+                int affectedRows = preparedStatement.executeUpdate();
+
+                if (affectedRows > 0) {
+                    // Retrieve the generated booking_id
+                    try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
+                        if (generatedKeys.next()) {
+                            int bookingId = generatedKeys.getInt(1);
+                            System.out.println("Booking successfully stored with booking_id: " + bookingId);
+                        } else {
+                            System.err.println("Failed to retrieve the generated booking_id.");
+                        }
+                    }
+                } else {
+                    System.err.println("Failed to store booking in the database.");
+                }
+            }
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}
+
+
+    private void showUserProfile() {
+    String url = "jdbc:mysql://localhost:3306/mydb";
+    String email = ""; // Set this to the email of the logged-in user
+    String[] userInfo = getUserInfo(email);
+
+    if (userInfo != null) {
+        StringBuilder userProfile = new StringBuilder();
+        userProfile.append("Lastname: ").append(userInfo[0]).append("\n");
+        userProfile.append("Firstname: ").append(userInfo[1]).append("\n");
+        userProfile.append("Address: ").append(userInfo[2]).append("\n");
+        userProfile.append("Contact: ").append(userInfo[3]).append("\n");
+        userProfile.append("Email: ").append(userInfo[4]).append("\n");
+        userProfile.append("Gender: ").append(userInfo[6]).append("\n");
+        userProfile.append("Birthdate: ").append(userInfo[7]).append("\n");
+        userProfile.append("Age: ").append(userInfo[8]).append("\n");
+
+        JOptionPane.showMessageDialog(homeFrame, userProfile.toString(), "User Profile", JOptionPane.INFORMATION_MESSAGE);
+    } else {
+        JOptionPane.showMessageDialog(homeFrame, "Failed to retrieve user information for email: " + email);
+    }
+}
+
+
+private String[] getUserInfo(String email) {
+    try {
+        String url = "jdbc:mysql://localhost:3306/mydb";
+        String username = "root";
+        String password = "";
+
+        Class.forName("com.mysql.cj.jdbc.Driver");
+
+                try (Connection connection = DriverManager.getConnection(url, username, password)) {
+            String selectQuery = "SELECT * FROM users WHERE email=?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(selectQuery)) {
+                preparedStatement.setString(1, email);
+
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        // Retrieve user information
+                        String[] userInfo = new String[9];
+                        userInfo[0] = resultSet.getString("lastname");
+                        userInfo[1] = resultSet.getString("firstname");
+                        userInfo[2] = resultSet.getString("address");
+                        userInfo[3] = resultSet.getString("contact");
+                        userInfo[4] = resultSet.getString("email");
+                        userInfo[5] = resultSet.getString("password");
+                        userInfo[6] = resultSet.getString("gender");
+                        userInfo[7] = resultSet.getString("birthdate");
+                        userInfo[8] = resultSet.getString("age");
+
+                        return userInfo;
+                    } else {
+                        System.out.println("User not found for email: " + email);
+                    }
+                }
+            }
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return null;
+}
+
+
+     // ImagePanel class for setting the background image
+    class ImagePanel extends JPanel {
+        private Image backgroundImage;
+
+        public ImagePanel(String imagePath) {
+            backgroundImage = new ImageIcon(imagePath).getImage();
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
+        }
+    }
+   private boolean cancelBooking(int bookingId) {  //cancel bookings
+    try {
+        String url = "jdbc:mysql://localhost:3306/mydb";
+        String username = "root";
+        String password = "";
+
+        Class.forName("com.mysql.cj.jdbc.Driver");
+
+        try (Connection connection = DriverManager.getConnection(url, username, password)) {
+            String deleteQuery = "DELETE FROM bookings WHERE booking_id = ?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(deleteQuery)) {
+                preparedStatement.setInt(1, bookingId);
+
+                int rowsAffected = preparedStatement.executeUpdate();
+
+                return rowsAffected > 0;
+            }
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+        return false;
+    }
+}
+
+
+   private boolean performLogin(String enteredEmail, String enteredPassword) {
+    try {
+        String url = "jdbc:mysql://localhost:3306/mydb"; // Replace with your actual database name
+        String username = "root"; // Replace with your actual MySQL username
+        String password = ""; // Replace with your actual MySQL password
+
+        Class.forName("com.mysql.cj.jdbc.Driver");
+
+        try (Connection connection = DriverManager.getConnection(url, username, password)) {
+            String selectQuery = "SELECT * FROM users WHERE email=? AND password=?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(selectQuery)) {
+                preparedStatement.setString(1, enteredEmail);
+                preparedStatement.setString(2, enteredPassword);
+
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    // If a matching user is found, the login is successful
+                    if (resultSet.next()) {
+                        // Set loggedInUserEmail with the user's email
+                        loggedInUserEmail = resultSet.getString("email");
+                        return true;
+                    }
+                }
+            }
+        }
+    } catch (Exception e) {
+        e.printStackTrace(); // Print the exception details for debugging
+    }
+
+    return false;
+}
+
+
+     private boolean performRegistration(String enteredLastName, String enteredFirstName, String enteredAddress, String enteredContact, String enteredEmail, String enteredPassword, String gender, String birthdate, String enteredAge) {
+        try {
+            String url = "jdbc:mysql://localhost:3306/mydb";
+            String username = "root";
+            String password = "";
+
+            Class.forName("com.mysql.cj.jdbc.Driver");
+
+            try (Connection connection = DriverManager.getConnection(url, username, password)) {
+                String insertQuery = "INSERT INTO users(lastname, firstname, address, contact, email, password, gender, birthdate, age) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                try (PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
+                    preparedStatement.setString(1, enteredLastName);
+                    preparedStatement.setString(2, enteredFirstName);
+                    preparedStatement.setString(3, enteredAddress);
+                    preparedStatement.setString(4, enteredContact);
+                    preparedStatement.setString(5, enteredEmail);
+                    preparedStatement.setString(6, enteredPassword);
+                    preparedStatement.setString(7, gender);
+                    preparedStatement.setString(8, birthdate);
+                    preparedStatement.setString(9, enteredAge);
+                    preparedStatement.executeUpdate();
+                }
+            }
+
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+}
