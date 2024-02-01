@@ -230,15 +230,15 @@ public class projectgroup4 {
 });
     	//user
     	profile.addActionListener(new ActionListener() {
-    		public void actionPerformed(ActionEvent e) {
-    			if (isLoggedIn) {
+    public void actionPerformed(ActionEvent e) {
+        if (isLoggedIn) {
             showUserProfile();
-        } 		else {
-            JOptionPane.showMessageDialog(homeFrame, "Please log in first.");
+        } else {
+            System.out.println("Profile button clicked: Opening registration form");
+            showRegistrationForm();
         }
     }
 });
-
         flightsButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent a) {
                 showFlightsTable();
@@ -750,30 +750,197 @@ private List<String[]> fetchFlightsFromDatabase(String departure, String destina
 }
 
 
-    private void showUserProfile() {
-    String url = "jdbc:mysql://localhost:3306/mydb";
-    String email = ""; // Set this to the email of the logged-in user
-    String[] userInfo = getUserInfo(email);
+private void showUserProfile() {
+    try {
+        if (loggedInUserEmail.isEmpty()) {
+            System.out.println("Email of the logged-in user is empty.");
+            JOptionPane.showMessageDialog(homeFrame, "Failed to retrieve user information. Please log in first.");
+            return;
+        }
 
-    if (userInfo != null) {
-        StringBuilder userProfile = new StringBuilder();
-        userProfile.append("Lastname: ").append(userInfo[0]).append("\n");
-        userProfile.append("Firstname: ").append(userInfo[1]).append("\n");
-        userProfile.append("Address: ").append(userInfo[2]).append("\n");
-        userProfile.append("Contact: ").append(userInfo[3]).append("\n");
-        userProfile.append("Email: ").append(userInfo[4]).append("\n");
-        userProfile.append("Gender: ").append(userInfo[6]).append("\n");
-        userProfile.append("Birthdate: ").append(userInfo[7]).append("\n");
-        userProfile.append("Age: ").append(userInfo[8]).append("\n");
+        String url = "jdbc:mysql://localhost:3306/mydb";
+        String[] userInfo = getUserInfo(loggedInUserEmail);
 
-        JOptionPane.showMessageDialog(homeFrame, userProfile.toString(), "User Profile", JOptionPane.INFORMATION_MESSAGE);
-    } else {
-        JOptionPane.showMessageDialog(homeFrame, "Failed to retrieve user information for email: " + email);
+        if (userInfo != null) {
+            StringBuilder userProfile = new StringBuilder();
+            userProfile.append("Lastname: ").append(userInfo[0]).append("\n");
+            userProfile.append("Firstname: ").append(userInfo[1]).append("\n");
+            userProfile.append("Address: ").append(userInfo[2]).append("\n");
+            userProfile.append("Contact: ").append(userInfo[3]).append("\n");
+            userProfile.append("Email: ").append(userInfo[4]).append("\n");
+            userProfile.append("Gender: ").append(userInfo[6]).append("\n");
+            userProfile.append("Birthdate: ").append(userInfo[7]).append("\n");
+            userProfile.append("Age: ").append(userInfo[8]).append("\n");
+
+            int option = JOptionPane.showConfirmDialog(homeFrame, userProfile.toString() + "\nDo you want to edit your profile?", "User Profile", JOptionPane.YES_NO_OPTION);
+
+            if (option == JOptionPane.YES_OPTION) {
+                // User chose to edit the profile
+                editUserProfile(userInfo);
+            }
+        } else {
+            JOptionPane.showMessageDialog(homeFrame, "Failed to retrieve user information for email: " + loggedInUserEmail);
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
     }
 }
 
+private void editUserProfile(String[] userInfo) {
+    JFrame editProfileFrame = new JFrame("Edit Profile");
+
+    // Create editable form components
+    JTextField lastNameField = new JTextField(userInfo[0]);
+    JTextField firstNameField = new JTextField(userInfo[1]);
+    JTextField addressField = new JTextField(userInfo[2]);
+    JTextField contactField = new JTextField(userInfo[3]);
+    JTextField emailField = new JTextField(userInfo[4]);
+    JComboBox<String> genderComboBox = new JComboBox<>(new String[]{"Male", "Female", "Other"});
+    genderComboBox.setSelectedItem(userInfo[6]);
+    JTextField birthdateField = new JTextField(userInfo[7]);
+    JTextField ageField = new JTextField(userInfo[8]);
+
+    JButton saveButton = new JButton("Save");
+    JButton deleteAccountButton = new JButton("Delete Account");
+
+    // Set positions for editable form components
+    // Adjust positions as needed
+    lastNameField.setBounds(10, 50, 165, 25);
+    firstNameField.setBounds(10, 80, 165, 25);
+    addressField.setBounds(10, 110, 165, 25);
+    contactField.setBounds(10, 140, 165, 25);
+    emailField.setBounds(10, 170, 165, 25);
+    genderComboBox.setBounds(10, 200, 165, 25);
+    birthdateField.setBounds(10, 230, 165, 25);
+    ageField.setBounds(10, 260, 165, 25);
+    saveButton.setBounds(30, 300, 80, 25);
+    deleteAccountButton.setBounds(120, 300, 120, 25);
+
+    // Add editable form components to frame
+    editProfileFrame.add(lastNameField);
+    editProfileFrame.add(firstNameField);
+    editProfileFrame.add(addressField);
+    editProfileFrame.add(contactField);
+    editProfileFrame.add(emailField);
+    editProfileFrame.add(genderComboBox);
+    editProfileFrame.add(birthdateField);
+    editProfileFrame.add(ageField);
+    editProfileFrame.add(saveButton);
+    editProfileFrame.add(deleteAccountButton);
+
+    // Set layout and visibility for the frame
+    editProfileFrame.setLayout(null);
+    editProfileFrame.setSize(600, 400);
+    editProfileFrame.setLocationRelativeTo(null);
+    editProfileFrame.setVisible(true);
+
+    saveButton.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent a) {
+            // Get the updated values
+            String updatedLastName = lastNameField.getText();
+            String updatedFirstName = firstNameField.getText();
+            String updatedAddress = addressField.getText();
+            String updatedContact = contactField.getText();
+            String updatedEmail = emailField.getText();
+            String updatedGender = (String) genderComboBox.getSelectedItem();
+            String updatedBirthdate = birthdateField.getText();
+            String updatedAge = ageField.getText();
+
+            // Perform update logic
+            if (performProfileUpdate(updatedLastName, updatedFirstName, updatedAddress, updatedContact, updatedEmail, updatedGender, updatedBirthdate, updatedAge)) {
+                JOptionPane.showMessageDialog(editProfileFrame, "Profile updated successfully!");
+                editProfileFrame.dispose(); // Close the edit profile frame
+            } else {
+                JOptionPane.showMessageDialog(editProfileFrame, "Profile update failed. Try again.");
+            }
+        }
+    });
+
+    deleteAccountButton.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+            int deleteConfirmation = JOptionPane.showConfirmDialog(editProfileFrame, "Are you sure you want to delete your account?", "Delete Account", JOptionPane.YES_NO_OPTION);
+
+            if (deleteConfirmation == JOptionPane.YES_OPTION) {
+                if (deleteUserAccount(loggedInUserEmail)) {
+                    JOptionPane.showMessageDialog(editProfileFrame, "Account deleted successfully.");
+                    editProfileFrame.dispose(); // Close the edit profile frame
+                    // Additional actions after account deletion can be added here
+                } else {
+                    JOptionPane.showMessageDialog(editProfileFrame, "Failed to delete account. Please try again.");
+                }
+            }
+        }
+    });
+}
+//SAVE USER
+private boolean performProfileUpdate(String lastName, String firstName, String address, String contact, String email, String gender, String birthdate, String age) {
+    try {
+        String url = "jdbc:mysql://localhost:3306/mydb";
+        String username = "root";
+        String dbPassword = "";
+
+        Class.forName("com.mysql.cj.jdbc.Driver");
+
+        try (Connection connection = DriverManager.getConnection(url, username, dbPassword)) {
+            String updateQuery = "UPDATE users SET lastname=?, firstname=?, address=?, contact=?, gender=?, birthdate=?, age=? WHERE email=?";
+
+            try (PreparedStatement preparedStatement = connection.prepareStatement(updateQuery)) {
+                preparedStatement.setString(1, lastName);
+                preparedStatement.setString(2, firstName);
+                preparedStatement.setString(3, address);
+                preparedStatement.setString(4, contact);
+                preparedStatement.setString(5, gender);
+                preparedStatement.setString(6, birthdate);
+                preparedStatement.setString(7, age);
+                preparedStatement.setString(8, email);
+
+                int rowsAffected = preparedStatement.executeUpdate();
+
+                return rowsAffected > 0; // If rowsAffected is greater than 0, update was successful
+            }
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return false; // Update failed
+}
+//DELETE USER
+private boolean deleteUserAccount(String email) {
+    try {
+        String url = "jdbc:mysql://localhost:3306/mydb";
+        String username = "root";
+        String dbPassword = "";
+
+        Class.forName("com.mysql.cj.jdbc.Driver");
+
+        try (Connection connection = DriverManager.getConnection(url, username, dbPassword)) {
+            String deleteQuery = "DELETE FROM users WHERE email=?";
+
+            try (PreparedStatement preparedStatement = connection.prepareStatement(deleteQuery)) {
+                preparedStatement.setString(1, email);
+
+                int rowsAffected = preparedStatement.executeUpdate();
+
+                if (rowsAffected > 0) {
+                    // Deletion was successful, so log out the user
+                    isLoggedIn = false;
+                    updateProfileButtonState(); // Update the state of the profile button
+                }
+
+                return rowsAffected > 0; // If rowsAffected is greater than 0, deletion was successful
+            }
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return false; // Deletion failed
+}
 
 private String[] getUserInfo(String email) {
+    String[] userInfo = new String[9];
+
     try {
         String url = "jdbc:mysql://localhost:3306/mydb";
         String username = "root";
@@ -781,7 +948,7 @@ private String[] getUserInfo(String email) {
 
         Class.forName("com.mysql.cj.jdbc.Driver");
 
-                try (Connection connection = DriverManager.getConnection(url, username, password)) {
+        try (Connection connection = DriverManager.getConnection(url, username, password)) {
             String selectQuery = "SELECT * FROM users WHERE email=?";
             try (PreparedStatement preparedStatement = connection.prepareStatement(selectQuery)) {
                 preparedStatement.setString(1, email);
@@ -789,20 +956,17 @@ private String[] getUserInfo(String email) {
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     if (resultSet.next()) {
                         // Retrieve user information
-                        String[] userInfo = new String[9];
                         userInfo[0] = resultSet.getString("lastname");
                         userInfo[1] = resultSet.getString("firstname");
                         userInfo[2] = resultSet.getString("address");
                         userInfo[3] = resultSet.getString("contact");
                         userInfo[4] = resultSet.getString("email");
-                        userInfo[5] = resultSet.getString("password");
                         userInfo[6] = resultSet.getString("gender");
                         userInfo[7] = resultSet.getString("birthdate");
                         userInfo[8] = resultSet.getString("age");
-
-                        return userInfo;
                     } else {
                         System.out.println("User not found for email: " + email);
+                        return null; // Return null if the user is not found
                     }
                 }
             }
@@ -811,9 +975,8 @@ private String[] getUserInfo(String email) {
         e.printStackTrace();
     }
 
-    return null;
+    return userInfo;
 }
-
 
      // ImagePanel class for setting the background image
     class ImagePanel extends JPanel {
@@ -886,35 +1049,37 @@ private String[] getUserInfo(String email) {
 }
 
 
-     private boolean performRegistration(String enteredLastName, String enteredFirstName, String enteredAddress, String enteredContact, String enteredEmail, String enteredPassword, String gender, String birthdate, String enteredAge) {
-        try {
-            String url = "jdbc:mysql://localhost:3306/mydb";
-            String username = "root";
-            String password = "";
+     private boolean performRegistration(String lastName, String firstName, String address, String contact, String email, String password, String gender, String birthdate, String age) {
+    try {
+        String url = "jdbc:mysql://localhost:3306/mydb";
+        String username = "root";
+        String dbPassword = "";
 
-            Class.forName("com.mysql.cj.jdbc.Driver");
+        Class.forName("com.mysql.cj.jdbc.Driver");
 
-            try (Connection connection = DriverManager.getConnection(url, username, password)) {
-                String insertQuery = "INSERT INTO users(lastname, firstname, address, contact, email, password, gender, birthdate, age) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-                try (PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
-                    preparedStatement.setString(1, enteredLastName);
-                    preparedStatement.setString(2, enteredFirstName);
-                    preparedStatement.setString(3, enteredAddress);
-                    preparedStatement.setString(4, enteredContact);
-                    preparedStatement.setString(5, enteredEmail);
-                    preparedStatement.setString(6, enteredPassword);
-                    preparedStatement.setString(7, gender);
-                    preparedStatement.setString(8, birthdate);
-                    preparedStatement.setString(9, enteredAge);
-                    preparedStatement.executeUpdate();
-                }
+        try (Connection connection = DriverManager.getConnection(url, username, dbPassword)) {
+            String insertQuery = "INSERT INTO users (lastname, firstname, address, contact, email, password, gender, birthdate, age) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+            try (PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
+                preparedStatement.setString(1, lastName);
+                preparedStatement.setString(2, firstName);
+                preparedStatement.setString(3, address);
+                preparedStatement.setString(4, contact);
+                preparedStatement.setString(5, email);
+                preparedStatement.setString(6, password);
+                preparedStatement.setString(7, gender);
+                preparedStatement.setString(8, birthdate);
+                preparedStatement.setString(9, age);
+
+                int rowsAffected = preparedStatement.executeUpdate();
+
+                return rowsAffected > 0; // If rowsAffected is greater than 0, registration was successful
             }
-
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
         }
-
-        return false;
+    } catch (Exception e) {
+        e.printStackTrace();
     }
+
+    return false; // Registration failed
+}
 }
