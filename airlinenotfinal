@@ -17,11 +17,9 @@ public class projectgroup4 {
     private JButton logout;
     private String loggedInUserEmail;
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            new projectgroup4().showHomePage();
-        });
-    }
+public static void main(String[] args) {
+    SwingUtilities.invokeLater(() -> new projectgroup4().showHomePage());
+}
 
 
 	//BOOKINGS
@@ -209,12 +207,13 @@ public class projectgroup4 {
                 showRegistrationForm();
             }
         });
-		// Login button functions and frame
+		// Login button
         loginButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent a) {
                 showLoginPage();
             }
         });
+
 		//logout button
         logout.addActionListener(new ActionListener() {
     public void actionPerformed(ActionEvent e) {
@@ -245,6 +244,12 @@ public class projectgroup4 {
             }
         });
 
+        about.addActionListener(new ActionListener() {
+    public void actionPerformed(ActionEvent a) {
+        showAboutUsDialog();
+    }
+});
+
         bookings.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent a) {
                 if (isLoggedIn) {
@@ -258,6 +263,8 @@ public class projectgroup4 {
        homeFrame.setVisible(true);
 
     }
+
+    //HOVER
    private void addHoverEffect(JButton button, Color hoverColor) {
     Color originalColor = button.getBackground(); // Store the original color
     button.addMouseListener(new MouseAdapter() {
@@ -488,6 +495,37 @@ private boolean hasUserBookedFlight(String userEmail) {
     return false;
 }
 
+//ABOUT
+private void showAboutUsDialog() {
+        // Create a frame for About Us information
+        JFrame aboutUsFrame = new JFrame("About Us");
+
+        // Set background color for the frame
+        aboutUsFrame.getContentPane().setBackground(new Color(140, 216, 255));
+
+        // Set layout manager for the frame
+        aboutUsFrame.setLayout(new BorderLayout());
+
+        // Create a JLabel with the provided HTML content
+        String htmlContent = "<html><body style='font-size: 15pt; text-align: center;'>"
+                + "<p>Welcome to Nigga Airlines, where we take pride in connecting people with unforgettable experiences. "
+                + "Our team is dedicated to providing seamless and enjoyable journeys, ensuring every passenger feels valued and cherished. "
+                + "Embrace the freedom of the skies with Nigga Airlines, where we're committed to making your travel moments truly special.</p>"
+                + "</body></html>";
+        JLabel label = new JLabel(htmlContent);
+        label.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20)); // Add some padding
+
+        // Add the JLabel to the frame
+        aboutUsFrame.add(label, BorderLayout.CENTER);
+
+        // Set the frame size and make it visible
+        aboutUsFrame.setSize(600, 400);
+        aboutUsFrame.setLocationRelativeTo(null);
+        aboutUsFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Close only the About Us frame
+        aboutUsFrame.setVisible(true);
+    }
+
+//displayed FLights
 private void displayFlights(String departure, String destination) {
     JFrame flightsInfoFrame = new JFrame("Selected Flights");
    	flightsInfoFrame.getContentPane().setBackground(new Color(140,216,255));
@@ -602,10 +640,6 @@ private void bookFlight(String flightId, String departure, String destination, S
         JOptionPane.showMessageDialog(null, "Error booking flight. Please try again.");
     }
 }
-
-
-
-
 
 
 //flight database
@@ -749,7 +783,7 @@ private List<String[]> fetchFlightsFromDatabase(String departure, String destina
     }
 }
 
-
+//PROFILE
 private void showUserProfile() {
     try {
         if (loggedInUserEmail.isEmpty()) {
@@ -872,6 +906,7 @@ private void editUserProfile(String[] userInfo) {
         }
     });
 }
+
 //SAVE USER
 private boolean performProfileUpdate(String lastName, String firstName, String address, String contact, String email, String gender, String birthdate, String age) {
     try {
@@ -905,6 +940,7 @@ private boolean performProfileUpdate(String lastName, String firstName, String a
 
     return false; // Update failed
 }
+
 //DELETE USER
 private boolean deleteUserAccount(String email) {
     try {
@@ -992,6 +1028,7 @@ private String[] getUserInfo(String email) {
             g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
         }
     }
+
    private boolean cancelBooking(int bookingId) {  //cancel bookings
     try {
         String url = "jdbc:mysql://localhost:3306/mydb";
