@@ -8,6 +8,10 @@ import java.awt.Font;
 import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
 public class projectgroup4 {
 
@@ -238,18 +242,19 @@ public static void main(String[] args) {
         }
     }
 });
+//FLIGHTS BUTTON
         flightsButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent a) {
                 showFlightsTable();
             }
         });
-
+	//ABOUT BUTTON
         about.addActionListener(new ActionListener() {
     public void actionPerformed(ActionEvent a) {
         showAboutUsDialog();
     }
 });
-
+	//BOOKINGS BUTTON
         bookings.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent a) {
                 if (isLoggedIn) {
@@ -279,6 +284,7 @@ public static void main(String[] args) {
         }
     });
 }
+
 	//REGISTER
     private void showRegistrationForm() {
         JFrame registrationFrame = new JFrame("Register");
@@ -291,6 +297,7 @@ public static void main(String[] args) {
         JLabel contactLabel = new JLabel("Contact no:");
         JLabel emailLabel = new JLabel("Email:");
         JLabel passwordLabel = new JLabel("Password:");
+        JLabel confirmPasswordLabel = new JLabel("Confirm Pass:");
         JLabel genderLabel = new JLabel("Gender:");
         JLabel ageLabel = new JLabel("Age:");
         JLabel birthdateLabel = new JLabel("Birthdate:");
@@ -304,6 +311,7 @@ public static void main(String[] args) {
     	contactLabel.setForeground(Color.WHITE);
     	emailLabel.setForeground(Color.WHITE);
     	passwordLabel.setForeground(Color.WHITE);
+    	confirmPasswordLabel.setForeground(Color.WHITE);
     	genderLabel.setForeground(Color.WHITE);
     	ageLabel.setForeground(Color.WHITE);
     	birthdateLabel.setForeground(Color.WHITE);
@@ -315,10 +323,16 @@ public static void main(String[] args) {
         JTextField contactTextField = new JTextField();
         JTextField emailTextField = new JTextField();
         JPasswordField passwordField = new JPasswordField();
+		JPasswordField confirmPasswordField = new JPasswordField();  // Declare confirmPasswordField outside ActionListener
         JComboBox<String> genderComboBox = new JComboBox<>(new String[]{"Male", "Female", "Other"});
+        genderComboBox.setBackground(new Color(83, 196, 255));
         JTextField ageTextField = new JTextField();
         JTextField birthdateTextField = new JTextField();
+        JLabel formatLabel = new JLabel("(YY/MM/DD)");
         JButton registerButton = new JButton("Register");
+        registerButton.setBackground(new Color(83,196,255)); // Dodger Blue
+        JButton cancelButton = new JButton("Cancel");
+        cancelButton.setBackground(new Color(115, 147, 179));
 
 
         // Set positions for registration form components
@@ -334,17 +348,24 @@ public static void main(String[] args) {
         emailTextField.setBounds(100, 170, 165, 25);
         passwordLabel.setBounds(10, 200, 80, 25);
         passwordField.setBounds(100, 200, 165, 25);
-        genderLabel.setBounds(10, 230, 80, 25);
-        genderComboBox.setBounds(100, 230, 165, 25);
-        birthdateLabel.setBounds(10, 260, 80, 25);
-        birthdateTextField.setBounds(100, 260, 165, 25);
-        ageLabel.setBounds(10, 290, 80, 25);
-        ageTextField.setBounds(100, 290, 165, 25);
-        registerButton.setBounds(120, 330, 100, 25);
+		confirmPasswordLabel.setBounds(10, 230, 80, 25);
+		confirmPasswordField.setBounds(100, 230, 165, 25);
+
+        genderLabel.setBounds(10, 260, 80, 25);
+        genderComboBox.setBounds(100, 260, 165, 25);
+
+        birthdateLabel.setBounds(10, 290, 80, 25);
+        birthdateTextField.setBounds(100, 290, 165, 25);
+        formatLabel.setBounds(270, 290, 80, 25);
+        ageLabel.setBounds(10, 320, 80, 25);
+        ageTextField.setBounds(100, 320, 165, 25);
+        registerButton.setBounds(140, 380, 180, 35);
+        cancelButton.setBounds(140, 430, 180, 35);
 
 
         registrationFrame.setLayout(null);
-        registrationFrame.setBounds(575, 240, 350, 450);
+		registrationFrame.setSize(450, 550);
+		registrationFrame.setLocationRelativeTo(null);
         registrationFrame.setVisible(true);
 
         // Add registration form components to frame
@@ -360,13 +381,17 @@ public static void main(String[] args) {
         registrationFrame.add(emailTextField);
         registrationFrame.add(passwordLabel);
         registrationFrame.add(passwordField);
+		registrationFrame.add(confirmPasswordLabel);
+		registrationFrame.add(confirmPasswordField);
         registrationFrame.add(genderLabel);
         registrationFrame.add(genderComboBox);
         registrationFrame.add(birthdateLabel);
         registrationFrame.add(birthdateTextField);
+        registrationFrame.add(formatLabel);
         registrationFrame.add(ageLabel);
     	registrationFrame.add(ageTextField);
         registrationFrame.add(registerButton);
+        registrationFrame.add(cancelButton);
 
         contactTextField.addKeyListener(new KeyAdapter() {
         	public void keyPressed(KeyEvent e) {
@@ -379,37 +404,137 @@ public static void main(String[] args) {
         }
     }
 });
+		passwordField.addKeyListener(new KeyAdapter() {
+    		public void keyTyped(KeyEvent e) {
+        	// Check the length of the entered password
+        	if (passwordField.getPassword().length >= 8) {
+           	 	e.consume(); // Consume the key event to prevent additional characters from being typed
+        }
+    }
+});
 
+	//confirm password
+		confirmPasswordField.addFocusListener(new FocusAdapter() {
+    public void focusLost(FocusEvent e) {
+        // Get the entered password and confirm password
+        String enteredPassword = new String(passwordField.getPassword());
+        String enteredConfirmPassword = new String(confirmPasswordField.getPassword());
+
+        // Check if the passwords don't match
+        if (!enteredPassword.equals(enteredConfirmPassword)) {
+            JOptionPane.showMessageDialog(registrationFrame, "Passwords do not match.");
+        } else {
+            // Clear the message if passwords match
+            JOptionPane.showMessageDialog(registrationFrame, "Password matched."); // Empty message to clear any previous message
+        }
+    }
+});
 
         registerButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent a) {
-                // Get the entered values
-                String enteredLastName = lastnTextField.getText();
-                String enteredFirstName = firstnTextField.getText();
-                String enteredAddress = addressTextField.getText();
-                String enteredContact = contactTextField.getText();
-                String enteredEmail = emailTextField.getText();
-                char[] enteredPassword = passwordField.getPassword();
-                String selectedGender = (String) genderComboBox.getSelectedItem();
-                String enteredBirthdate = birthdateTextField.getText();
-                String enteredAge = ageTextField.getText();
+    public void actionPerformed(ActionEvent a) {
+        // Get the entered values
+        String enteredLastName = lastnTextField.getText();
+        String enteredFirstName = firstnTextField.getText();
+        String enteredAddress = addressTextField.getText();
+        String enteredContact = contactTextField.getText();
+        String enteredEmail = emailTextField.getText();
+   		char[] enteredPassword = passwordField.getPassword();
+        char[] enteredConfirmPassword = confirmPasswordField.getPassword();
+        String selectedGender = (String) genderComboBox.getSelectedItem();
+        String enteredBirthdate = birthdateTextField.getText();
+        String enteredAge = ageTextField.getText();
 
-                // Check if any field is empty
-                if (enteredLastName.isEmpty() || enteredFirstName.isEmpty() || enteredAddress.isEmpty() || enteredContact.isEmpty() || enteredEmail.isEmpty() || enteredPassword.length == 0 || selectedGender.isEmpty() || enteredBirthdate.isEmpty()) {
-                    JOptionPane.showMessageDialog(registrationFrame, "Please fill up all the fields");
-                    return;
-                }
+        //contact is used
 
-                // Perform registration logic
-                if (performRegistration(enteredLastName, enteredFirstName, enteredAddress, enteredContact, enteredEmail, new String(enteredPassword), selectedGender, enteredBirthdate, enteredAge)) {
-                    JOptionPane.showMessageDialog(registrationFrame, "Registration successful!");
-                    registrationFrame.dispose(); // Close the registration frame
-                } else {
-                    JOptionPane.showMessageDialog(registrationFrame, "Registration failed. Try again.");
-                }
+        if (isContactNumberAlreadyUsed(enteredContact)) {
+            JOptionPane.showMessageDialog(registrationFrame, "Contact No. is already in use. Please use a different number.");
+            return;
+        }
+
+		//email is used
+		if (isEmailAlreadyUsed(enteredEmail)) {
+            JOptionPane.showMessageDialog(registrationFrame, "Email is already in use. Please use a different email.");
+            return;
+        }
+		//password length
+		if (enteredPassword.length < 8) {
+            JOptionPane.showMessageDialog(registrationFrame, "Password must be at least 8 characters long.");
+            return;
+        }
+
+        //paswword confirmation
+                String enteredPasswordStr = new String(enteredPassword);
+        String enteredConfirmPasswordStr = new String(enteredConfirmPassword);
+        if (!enteredPasswordStr.equals(enteredConfirmPasswordStr)) {
+            JOptionPane.showMessageDialog(registrationFrame, "Passwords do not match.");
+            return;
+        }
+
+        // Check if any field is empty
+        if (enteredLastName.isEmpty() || enteredFirstName.isEmpty() || enteredAddress.isEmpty() || enteredContact.isEmpty() || enteredEmail.isEmpty() || enteredPassword.length == 0 || selectedGender.isEmpty() || enteredBirthdate.isEmpty()) {
+            JOptionPane.showMessageDialog(registrationFrame, "Please fill up all the fields");
+            return;
+        }
+
+        // Check if email has the format @gmail.com or @yahoo.com
+        if (!(enteredEmail.endsWith("@gmail.com") || enteredEmail.endsWith("@yahoo.com"))) {
+            JOptionPane.showMessageDialog(registrationFrame, "Please use a valid email.");
+            return;
+        }
+
+
+        // Check if age is 18 or above
+        try {
+            int age = Integer.parseInt(enteredAge);
+            if (age < 18) {
+                JOptionPane.showMessageDialog(registrationFrame, "You must be 18 or above to register.");
+                return;
             }
-        });
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(registrationFrame, "Please enter a valid age.");
+            return;
+        }
+
+        // Perform registration logic
+        if (performRegistration(enteredLastName, enteredFirstName, enteredAddress, enteredContact, enteredEmail, new String(enteredPassword), selectedGender, enteredBirthdate, enteredAge)) {
+            JOptionPane.showMessageDialog(registrationFrame, "Registration successful!");
+            registrationFrame.dispose(); // Close the registration frame
+        } else {
+            JOptionPane.showMessageDialog(registrationFrame, "Registration failed. Try again.");
+        }
     }
+});
+
+        cancelButton.addActionListener(new ActionListener() {
+    public void actionPerformed(ActionEvent a) {
+        registrationFrame.dispose(); // Close the registration frame on cancel
+    }
+});
+
+
+//HOVER EFFECT ON BUTTONS
+registerButton.addMouseListener(new java.awt.event.MouseAdapter() {
+    public void mouseEntered(java.awt.event.MouseEvent evt) {
+        registerButton.setBackground(new Color(70, 130, 180)); // Hover color
+    }
+
+    public void mouseExited(java.awt.event.MouseEvent evt) {
+        registerButton.setBackground(new Color(83,196,255)); // Reset to custom color (Dodger Blue) on exit
+    }
+});
+
+// Add hover effect for Cancel button
+cancelButton.addMouseListener(new java.awt.event.MouseAdapter() {
+    public void mouseEntered(java.awt.event.MouseEvent evt) {
+        cancelButton.setBackground(new Color(255, 99, 71)); // Hover color
+    }
+
+    public void mouseExited(java.awt.event.MouseEvent evt) {
+        cancelButton.setBackground(new Color(115, 147, 179)); // Reset to custom color (Red-Orange) on exit
+    }
+});
+    }
+
 
     //FLIGHTS
      private void showFlightsTable() {
@@ -425,16 +550,21 @@ public static void main(String[] args) {
 	JLabel fromLabel = new JLabel("From:");
     JLabel toLabel = new JLabel("To:");
     JButton searchButton = new JButton("Search Flights");
+    searchButton.setBackground(new Color(83,196,255));
 
     // Set positions for components
-    fromLabel.setBounds(10, 20, 60, 25);
-    departureComboBox.setBounds(10, 50, 120, 25);
-    toLabel.setBounds(140, 20, 30, 25);
-    destinationComboBox.setBounds(140, 50, 120, 25);
-    searchButton.setBounds(270, 50, 120, 25);
+    fromLabel.setBounds(100, 90, 60, 25);
+    departureComboBox.setBounds(140, 80, 100, 45);
+    departureComboBox.setBackground(new Color(150, 222, 209));
+    toLabel.setBounds(275, 90, 50, 25);
+    destinationComboBox.setBounds(300, 80, 100, 45);
+   destinationComboBox.setBackground(new Color(167, 199, 231));
+
+    searchButton.setBounds(180, 160, 150, 50);
 
     flightsFrame.setLayout(null);
-    flightsFrame.setBounds(575, 240, 500, 250);
+	flightsFrame.setSize(550, 280);
+	flightsFrame.setLocationRelativeTo(null);
     flightsFrame.setVisible(true);
 
     // Add components to frame
@@ -463,6 +593,15 @@ public static void main(String[] args) {
 
         // Perform logic to fetch and display flights based on the selected locations
         displayFlights(selectedDeparture, selectedDestination);
+    }
+});
+searchButton.addMouseListener(new java.awt.event.MouseAdapter() {
+    public void mouseEntered(java.awt.event.MouseEvent evt) {
+        searchButton.setBackground(new Color(70, 130, 180)); // Hover color
+    }
+
+    public void mouseExited(java.awt.event.MouseEvent evt) {
+        searchButton.setBackground(new Color(83,196,255)); // Reset to custom color (Dodger Blue) on exit
     }
 });
      }
@@ -544,22 +683,26 @@ private void displayFlights(String departure, String destination) {
     JScrollPane scrollPane = new JScrollPane(flightsTable);
 
     JButton proceedButton = new JButton("Proceed");
-    JButton backButton = new JButton("Back");
+    proceedButton.setBackground(new Color(83,196,255));
+
+    JButton cancelflightButton = new JButton("Cancel");
+    cancelflightButton.setBackground(new Color(115, 147, 179));
+
 
     flightsInfoFrame.setLayout(null);
     scrollPane.setBounds(10, 10, 500, 300);
-    proceedButton.setBounds(150, 320, 100, 25);
-    backButton.setBounds(260, 320, 100, 25);
+    proceedButton.setBounds(180, 320, 100, 25);
+    cancelflightButton.setBounds(290, 320, 100, 25);
 
     flightsInfoFrame.add(scrollPane);
     flightsInfoFrame.add(proceedButton);
-    flightsInfoFrame.add(backButton);
+    flightsInfoFrame.add(cancelflightButton);
 
     flightsInfoFrame.setSize(600, 400);
 	flightsInfoFrame.setLocationRelativeTo(null); // Center the frame on the screen
 	flightsInfoFrame.setVisible(true);
 
-    backButton.addActionListener(new ActionListener() {
+    cancelflightButton.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
             flightsInfoFrame.dispose(); // Close the current frame (Selected Flights)
@@ -590,6 +733,27 @@ private void displayFlights(String departure, String destination) {
         }
     }
 });
+ proceedButton.addMouseListener(new java.awt.event.MouseAdapter() {
+    public void mouseEntered(java.awt.event.MouseEvent evt) {
+        proceedButton.setBackground(new Color(70, 130, 180)); // Hover color
+    }
+
+    public void mouseExited(java.awt.event.MouseEvent evt) {
+         proceedButton.setBackground(new Color(83,196,255)); // Reset to custom color (Dodger Blue) on exit
+    }
+});
+
+// Add hover effect for Cancel button
+cancelflightButton.addMouseListener(new java.awt.event.MouseAdapter() {
+    public void mouseEntered(java.awt.event.MouseEvent evt) {
+        cancelflightButton.setBackground(new Color(255, 99, 71)); // Hover color
+    }
+
+    public void mouseExited(java.awt.event.MouseEvent evt) {
+       cancelflightButton.setBackground(new Color(115, 147, 179)); // Reset to custom color (Red-Orange) on exit
+    }
+});
+
 }
 
 
@@ -622,9 +786,6 @@ private boolean userHasBooking(String userEmail, String flightId, String departu
         return false;
     }
 }
-
-
-
 
 //booking the flight
 private void bookFlight(String flightId, String departure, String destination, String date, String cost) {
@@ -683,10 +844,32 @@ private List<String[]> fetchFlightsFromDatabase(String departure, String destina
     profile.setEnabled(isLoggedIn); //profile
     logout.setEnabled(isLoggedIn); //logout
 }
-    //Login codes
+
+ //Login codes
     private void showLoginPage() {
         JFrame loginFrame = new JFrame("Login");
         loginFrame.getContentPane().setBackground(new Color(140,216,255));
+
+        ImageIcon originalLogo = new ImageIcon("C:/Users/Ravz/Documents/JCreator LE/MyProjects/projectgroup4/login.png");
+
+        // Define the desired dimensions
+        int scaledWidth = 150;
+        int scaledHeight = 150;
+
+        // Get the Image from the ImageIcon
+        Image originalImage = originalLogo.getImage();
+
+        // Create a buffered image to work with
+        BufferedImage bufferedImage = new BufferedImage(scaledWidth, scaledHeight, BufferedImage.TYPE_INT_ARGB);
+
+        // Get the graphics context of the buffered image
+        bufferedImage.createGraphics().drawImage(originalImage, 0, 0, scaledWidth, scaledHeight, null);
+
+        // Create a new ImageIcon with the scaled image
+        ImageIcon scaledLogo = new ImageIcon(bufferedImage);
+
+        // Create a JLabel to display the scaled logo
+        JLabel logoLabel = new JLabel(scaledLogo);
 
         // Login Form Components
         JLabel emailLabel = new JLabel("Email:");
@@ -694,53 +877,97 @@ private List<String[]> fetchFlightsFromDatabase(String departure, String destina
         JTextField emailTextField = new JTextField();
         JPasswordField passwordField = new JPasswordField();
         JButton loginButton = new JButton("Login");
+        JButton cancelloginButton = new JButton("Cancel");
 
 
         // Set positions for login form components
-        emailLabel.setBounds(10, 50, 80, 25);
-        emailTextField.setBounds(100, 50, 165, 25);
-        passwordLabel.setBounds(10, 80, 80, 25);
-        passwordField.setBounds(100, 80, 165, 25);
-        loginButton.setBounds(10, 120, 80, 25);
+        logoLabel.setBounds(215, 17, 150, 150);
+        emailLabel.setBounds(190, 180, 80, 25);
+        emailTextField.setBounds(230, 180, 165, 25);
+        passwordLabel.setBounds(163, 230, 80, 25);
+        passwordField.setBounds(230, 230, 165, 25);
+        loginButton.setBounds(200, 280, 180, 35);
+        loginButton.setBackground(new Color(83,196,255));
+        cancelloginButton.setBounds(200, 330, 180, 35);
+        cancelloginButton.setBackground(new Color(115, 147, 179));
+
 
 
         loginFrame.setLayout(null);
-        loginFrame.setBounds(575, 240, 300, 200);
+		loginFrame.setSize(575, 440);
+		loginFrame.setLocationRelativeTo(null);
         loginFrame.setVisible(true);
 
         // Add login form components to frame
+        loginFrame.add(logoLabel);
         loginFrame.add(emailLabel);
         loginFrame.add(emailTextField);
         loginFrame.add(passwordLabel);
         loginFrame.add(passwordField);
         loginFrame.add(loginButton);
+        loginFrame.add(cancelloginButton);
 
 
-        loginButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent a) {
-                // Get the entered values
-                String enteredEmail = emailTextField.getText();
-                char[] enteredPassword = passwordField.getPassword();
+        if (isLoggedIn) {
+    loginButton.setEnabled(false); // Disable the login button
+}
 
-                // Check if any field is empty
-                if (enteredEmail.isEmpty() || enteredPassword.length == 0) {
-                    JOptionPane.showMessageDialog(loginFrame, "Please fill up all the fields");
-                    return; // Exit the actionPerformed method to prevent further execution
-                }
+// Add action listener for login button
+loginButton.addActionListener(new ActionListener() {
+    public void actionPerformed(ActionEvent a) {
+        // Check if the user is already logged in
+        if (isLoggedIn) {
+            JOptionPane.showMessageDialog(loginFrame, "You are already logged in!");
+            return; // Exit the actionPerformed method to prevent further execution
+        }
 
-                // Perform login logic
-                if (performLogin(enteredEmail, new String(enteredPassword))) {
-                    JOptionPane.showMessageDialog(loginFrame, "Login successful!");
-                    isLoggedIn = true;
-                    loginFrame.dispose(); // Close the login frame or navigate to the next screen
-                    updateProfileButtonState();
+        // Get the entered values
+        String enteredEmail = emailTextField.getText();
+        char[] enteredPassword = passwordField.getPassword();
 
+        // Check if any field is empty
+        if (enteredEmail.isEmpty() || enteredPassword.length == 0) {
+            JOptionPane.showMessageDialog(loginFrame, "Please fill up all the fields");
+            return; // Exit the actionPerformed method to prevent further execution
+        }
 
-                } else {
-                    JOptionPane.showMessageDialog(loginFrame, "Login failed. Please check your email or password.");
-                }
-            }
-        });
+        // Perform login logic
+        if (performLogin(enteredEmail, new String(enteredPassword))) {
+            JOptionPane.showMessageDialog(loginFrame, "Login successful!");
+            isLoggedIn = true;
+            loginButton.setEnabled(false); // Disable the login button after successful login
+            loginFrame.dispose(); // Close the login frame or navigate to the next screen
+            updateProfileButtonState();
+        } else {
+            JOptionPane.showMessageDialog(loginFrame, "Login failed. Please check your email or password.");
+        }
+    }
+});
+        cancelloginButton.addActionListener(new ActionListener() {
+    public void actionPerformed(ActionEvent a) {
+        loginFrame.dispose(); // Close the login frame on cancel
+    }
+});
+loginButton.addMouseListener(new java.awt.event.MouseAdapter() {
+    public void mouseEntered(java.awt.event.MouseEvent evt) {
+        loginButton.setBackground(new Color(70, 130, 180)); // Hover color
+    }
+
+    public void mouseExited(java.awt.event.MouseEvent evt) {
+        loginButton.setBackground(new Color(83,196,255)); // Reset to custom color (Dodger Blue) on exit
+    }
+});
+
+// Add hover effect for Cancel button
+cancelloginButton.addMouseListener(new java.awt.event.MouseAdapter() {
+    public void mouseEntered(java.awt.event.MouseEvent evt) {
+        cancelloginButton.setBackground(new Color(255, 99, 71)); // Hover color
+    }
+
+    public void mouseExited(java.awt.event.MouseEvent evt) {
+        cancelloginButton.setBackground(new Color(115, 147, 179)); // Reset to custom color (Red-Orange) on exit
+    }
+});
     }
 
     private void storeBookingInDatabase(String userEmail, String flightId, String departure, String destination, String date, String cost) {
@@ -822,8 +1049,19 @@ private void showUserProfile() {
 
 private void editUserProfile(String[] userInfo) {
     JFrame editProfileFrame = new JFrame("Edit Profile");
+    editProfileFrame.getContentPane().setBackground(new Color(140,216,255));
 
     // Create editable form components
+
+    JLabel lastnLabel = new JLabel("Lastname:");
+    JLabel firstnLabel = new JLabel("Firstname:");
+    JLabel addressLabel = new JLabel("Address:");
+    JLabel contactLabel = new JLabel("Contact no:");
+    JLabel emailLabel = new JLabel("Email:");
+    JLabel genderLabel = new JLabel("Gender:");
+    JLabel ageLabel = new JLabel("Age:");
+    JLabel birthdateLabel = new JLabel("Birthdate:");
+
     JTextField lastNameField = new JTextField(userInfo[0]);
     JTextField firstNameField = new JTextField(userInfo[1]);
     JTextField addressField = new JTextField(userInfo[2]);
@@ -835,22 +1073,42 @@ private void editUserProfile(String[] userInfo) {
     JTextField ageField = new JTextField(userInfo[8]);
 
     JButton saveButton = new JButton("Save");
+    saveButton.setBackground(new Color(83,196,255));
     JButton deleteAccountButton = new JButton("Delete Account");
+    deleteAccountButton.setBackground(new Color(115, 147, 179));
 
-    // Set positions for editable form components
+
     // Adjust positions as needed
-    lastNameField.setBounds(10, 50, 165, 25);
-    firstNameField.setBounds(10, 80, 165, 25);
-    addressField.setBounds(10, 110, 165, 25);
-    contactField.setBounds(10, 140, 165, 25);
-    emailField.setBounds(10, 170, 165, 25);
-    genderComboBox.setBounds(10, 200, 165, 25);
-    birthdateField.setBounds(10, 230, 165, 25);
-    ageField.setBounds(10, 260, 165, 25);
-    saveButton.setBounds(30, 300, 80, 25);
-    deleteAccountButton.setBounds(120, 300, 120, 25);
+    lastnLabel.setBounds(100, 50, 165, 25);
+    firstnLabel.setBounds(100, 80, 165, 25);
+    addressLabel.setBounds(100, 110, 165, 25);
+    contactLabel.setBounds(100,140, 165, 25);
+    emailLabel.setBounds(100,170, 165, 25);
+    genderLabel.setBounds(100,200, 165, 25);
+    ageLabel.setBounds(100, 260, 165, 25);
+    birthdateLabel.setBounds(100, 230, 165, 25);
+    lastNameField.setBounds(180, 50, 165, 25);
+    firstNameField.setBounds(180, 80, 165, 25);
+    addressField.setBounds(180, 110, 165, 25);
+    contactField.setBounds(180, 140, 165, 25);
+    emailField.setBounds(180, 170, 165, 25);
+    genderComboBox.setBounds(180, 200, 165, 25);
+    birthdateField.setBounds(180, 230, 165, 25);
+    ageField.setBounds(180, 260, 165, 25);
+    saveButton.setBounds(200, 300, 80, 45);
+    deleteAccountButton.setBounds(310, 300, 120, 45);
+
+
 
     // Add editable form components to frame
+    editProfileFrame.add(lastnLabel);
+    editProfileFrame.add(firstnLabel);
+    editProfileFrame.add(addressLabel);
+    editProfileFrame.add(contactLabel);
+    editProfileFrame.add(emailLabel);
+    editProfileFrame.add(genderLabel);
+    editProfileFrame.add(ageLabel);
+    editProfileFrame.add(birthdateLabel);
     editProfileFrame.add(lastNameField);
     editProfileFrame.add(firstNameField);
     editProfileFrame.add(addressField);
@@ -905,6 +1163,27 @@ private void editUserProfile(String[] userInfo) {
             }
         }
     });
+
+    saveButton.addMouseListener(new java.awt.event.MouseAdapter() {
+    public void mouseEntered(java.awt.event.MouseEvent evt) {
+        saveButton.setBackground(new Color(70, 130, 180)); // Hover color
+    }
+
+    public void mouseExited(java.awt.event.MouseEvent evt) {
+        saveButton.setBackground(new Color(83,196,255)); // Reset to custom color (Dodger Blue) on exit
+    }
+});
+
+// Add hover effect for Cancel button
+ deleteAccountButton.addMouseListener(new java.awt.event.MouseAdapter() {
+    public void mouseEntered(java.awt.event.MouseEvent evt) {
+         deleteAccountButton.setBackground(new Color(255, 99, 71)); // Hover color
+    }
+
+    public void mouseExited(java.awt.event.MouseEvent evt) {
+         deleteAccountButton.setBackground(new Color(115, 147, 179)); // Reset to custom color (Red-Orange) on exit
+    }
+});
 }
 
 //SAVE USER
@@ -1053,7 +1332,6 @@ private String[] getUserInfo(String email) {
     }
 }
 
-
    private boolean performLogin(String enteredEmail, String enteredPassword) {
     try {
         String url = "jdbc:mysql://localhost:3306/mydb"; // Replace with your actual database name
@@ -1088,6 +1366,15 @@ private String[] getUserInfo(String email) {
 
      private boolean performRegistration(String lastName, String firstName, String address, String contact, String email, String password, String gender, String birthdate, String age) {
     try {
+        // Check if the email is already used
+        if (isEmailAlreadyUsed(email)) {
+            return false; // Registration failed if email is already in use
+        }
+         if (isContactNumberAlreadyUsed(contact)) {
+            return false; // Registration failed if contact number is already in use
+        }
+
+
         String url = "jdbc:mysql://localhost:3306/mydb";
         String username = "root";
         String dbPassword = "";
@@ -1118,5 +1405,60 @@ private String[] getUserInfo(String email) {
     }
 
     return false; // Registration failed
+}
+private boolean isContactNumberAlreadyUsed(String contact) {
+    try {
+        String url = "jdbc:mysql://localhost:3306/mydb";
+        String username = "root";
+        String dbPassword = "";
+
+        Class.forName("com.mysql.cj.jdbc.Driver");
+
+        try (Connection connection = DriverManager.getConnection(url, username, dbPassword)) {
+            String selectQuery = "SELECT COUNT(*) FROM users WHERE contact = ?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(selectQuery)) {
+                preparedStatement.setString(1, contact);
+
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        int count = resultSet.getInt(1);
+                        return count > 0; // If count is greater than 0, contact number is already used
+                    }
+                }
+            }
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return false; // Assume contact number is not used (registration can proceed)
+}
+
+private boolean isEmailAlreadyUsed(String email) {
+    try {
+        String url = "jdbc:mysql://localhost:3306/mydb";
+        String username = "root";
+        String dbPassword = "";
+
+        Class.forName("com.mysql.cj.jdbc.Driver");
+
+        try (Connection connection = DriverManager.getConnection(url, username, dbPassword)) {
+            String selectQuery = "SELECT COUNT(*) FROM users WHERE email = ?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(selectQuery)) {
+                preparedStatement.setString(1, email);
+
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        int count = resultSet.getInt(1);
+                        return count > 0; // If count is greater than 0, email is already used
+                    }
+                }
+            }
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return false; // Assume email is not used (registration can proceed)
 }
 }
