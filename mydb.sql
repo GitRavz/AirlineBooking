@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 31, 2024 at 02:28 PM
+-- Generation Time: Feb 02, 2024 at 03:51 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -34,16 +34,16 @@ CREATE TABLE `bookings` (
   `departure_location` varchar(255) DEFAULT NULL,
   `destination_location` varchar(255) DEFAULT NULL,
   `flight_date` date DEFAULT NULL,
-  `cost` varchar(255) DEFAULT NULL
+  `cost` varchar(255) DEFAULT NULL,
+  `is_paid` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `bookings`
 --
 
-INSERT INTO `bookings` (`booking_id`, `user_email`, `flight_id`, `departure_location`, `destination_location`, `flight_date`, `cost`) VALUES
-(52, 'niggsample', 'FI-137', 'Iloilo', 'Bicol', '2024-11-21', '18000.00'),
-(55, 'mememe', 'FI-6', 'Manila', 'Palawan', '2024-01-11', '6000.00');
+INSERT INTO `bookings` (`booking_id`, `user_email`, `flight_id`, `departure_location`, `destination_location`, `flight_date`, `cost`, `is_paid`) VALUES
+(69, 'testlang@gmail.com', 'FI-96', 'Davao', 'Manila', '2024-01-15', '4000.00', 0);
 
 -- --------------------------------------------------------
 
@@ -467,20 +467,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`lastname`, `firstname`, `address`, `contact`, `email`, `password`, `gender`, `birthdate`, `age`) VALUES
-('test', 'account', 'sabahay', '099999999', 'testaccount@gmail.com', '12345', 'Male', '2011-11-23', NULL),
-('ravz', 'lhie', 'sa bahay', '099999999', 'testaccount', '12345', 'Male', '2023-10-13', '22'),
-('ako', 'sya', 'dito samin', '09999999', 'akolangto', '12345', 'Male', '2011-11-11', '40'),
-('nigga', 'air', 'sabahay', '099999999', 'niggsample', '12345', 'Other', '2011-11-01', '67'),
-('me', 'you', '12345', '099999999', 'mememe', '12345', 'Male', '2011-11-11', '45'),
-('sample', 'lang', 'sabahay', '0999999', 'sample123', '12345', 'Male', '2011-11-11', '23'),
-('ravelo', 'lhienhiel', 'sabahaylang', '09999999', 'gagamitinkolang', '123456', 'Male', '2011-11-11', '60'),
-('try', 'lang', 'sabahay', '09999999', 'trylang123', '12345', 'Male', '2024-11-11', '32'),
-('ako', 'kami', 'ditosamin', '08888888', 'ditoako', '12345', 'Male', '2002-12-23', '12'),
-('book', 'me', 'book', '099999999', 'bookme', '12345', 'Male', '2023-12-01', '19'),
-('Ravelo', 'Lhienhiel', 'bahay', '09999999', 'parangewan', '12345', 'Male', '2001-10-13', '19'),
-('guts', 'berserk', 'berserk', '0999999', 'gutster', '12345', 'Female', '1998-08-23', '45'),
-('dela cruz', 'danica', 'sabahay', '088888888', 'danica', '12345', 'Female', '2002-07-10', '21'),
-('akoito', 'na naman', 'sa bahay parin', '099999999', 'akoversiontwo', '12345', 'Male', '2011-09-22', '30');
+('testaccount', 'test1', 'sabahay', '0999999999', 'testlang@gmail.com', '12345678', 'Female', '2001-10-13', '22');
 
 --
 -- Indexes for dumped tables
@@ -512,7 +499,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `bookings`
 --
 ALTER TABLE `bookings`
-  MODIFY `booking_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
+  MODIFY `booking_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=70;
 
 --
 -- AUTO_INCREMENT for table `flights`
