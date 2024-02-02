@@ -42,74 +42,120 @@ public static void main(String[] args) {
 
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     // Create a new JFrame to display user bookings
-                    JFrame frame = new JFrame("User Bookings");
-                    frame.setSize(600, 400);
-                    frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-                    // Create a JPanel to hold the booking information
-                    JPanel panel = new JPanel();
-                    panel.setBackground(new Color(140,216,255));
-                    panel.setLayout(new GridLayout(0, 2));
+                    JFrame bookframe = new JFrame("User Bookings");
+					bookframe.setSize(600, 400);
+					bookframe.getContentPane().setBackground(new Color(140,216,255));
 
-                    boolean hasBookedFlights = false;
+					bookframe.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+					bookframe.setLayout(null); // Set layout to null for manual positioning
 
-                    while (resultSet.next()) {
-                        int bookingId =  resultSet.getInt("booking_id");
-                        String flightId = resultSet.getString("flight_id");
-                        String departure = resultSet.getString("departure_location");
-                        String destination = resultSet.getString("destination_location");
-                        String date = resultSet.getString("flight_date");
-                        String cost = resultSet.getString("cost");
+					// Create a JLabel to display the title
+					JLabel titleLabel = new JLabel("Your Bookings:");
+					titleLabel.setForeground(new Color(1,11,19));
+					Font titleFont = new Font("Castellar", Font.BOLD, 16);
+					titleLabel.setFont(titleFont);
+					titleLabel.setBounds(200, 40, 200, 85);
+					bookframe.add(titleLabel);
 
-                        // Display booking information in labels
-                        JLabel labelBookingId = new JLabel("Booking ID: " + bookingId);
-                        JLabel labelFlightId = new JLabel("Flight ID: " + flightId);
-                        JLabel labelDeparture = new JLabel("Departure: " + departure);
-                        JLabel labelDestination = new JLabel("Destination: " + destination);
-                        JLabel labelDate = new JLabel("Date: " + date);
-                        JLabel labelCost = new JLabel("Cost: " + cost);
+					boolean hasBookedFlights = false;
 
-                        // Add labels to the panel
-                        panel.add(labelBookingId);
-                        panel.add(labelFlightId);
-                        panel.add(labelDeparture);
-                        panel.add(labelDestination);
-                        panel.add(labelDate);
-                        panel.add(labelCost);
-                        hasBookedFlights = true;
-                    }
+					while (resultSet.next()) {
 
-                    // Add the panel to the frame
-                    frame.add(panel);
+    					int bookingId = resultSet.getInt("booking_id");
+    					String flightId = resultSet.getString("flight_id");
+    					String departure = resultSet.getString("departure_location");
+    					String destination = resultSet.getString("destination_location");
+    					String date = resultSet.getString("flight_date");
+    					String cost = resultSet.getString("cost");
 
-                    if (hasBookedFlights) {
-                        JButton cancelButton = new JButton("Cancel Booking");
-                        cancelButton.addActionListener(new ActionListener() {
-                            @Override
-                            public void actionPerformed(ActionEvent e) {
-                                int selectedBookingId = Integer.parseInt(JOptionPane.showInputDialog(frame, "Enter Booking ID to cancel:"));
+    // Display booking information in labels
+    JLabel labelBookingId = new JLabel("Booking ID: " + bookingId);
+    JLabel labelFlightId = new JLabel("Flight ID: " + flightId);
+    JLabel labelDeparture = new JLabel("Departure: " + departure);
+    JLabel labelDestination = new JLabel("Destination: " + destination);
+    JLabel labelDate = new JLabel("Date: " + date);
+    JLabel labelCost = new JLabel("Cost: " + cost);
 
-                                // Implement the cancel booking logic (you may want to verify the booking ID)
-                                if (cancelBooking(selectedBookingId)) {
-                                    JOptionPane.showMessageDialog(frame, "Booking canceled successfully.");
-                                    frame.dispose(); // Close the current frame
-                                    showUserBookings(userEmail); // Reopen the frame
-                                } else {
-                                    JOptionPane.showMessageDialog(frame, "Please input the correct Book ID and try again.");
-                                }
-                            }
-                        });
-                        panel.add(cancelButton);
-                    } else {
-    // If no booked flights, display a message using JOptionPane
-    JOptionPane.showMessageDialog(frame, "No booked flights found.", "No Bookings", JOptionPane.INFORMATION_MESSAGE);
+    labelBookingId.setForeground(new Color(15,135,195));
+	labelFlightId.setForeground(new Color(15,135,195));
+	labelDeparture.setForeground(new Color(15,135,195));
+	labelDestination.setForeground(new Color(15,135,195));
+	labelDate.setForeground(new Color(15,135,195));
+	labelCost.setForeground(new Color(15,135,195));
+
+	// Set font for labels
+	Font labelFont = new Font("Berlin Sans FB Demi", Font.PLAIN, 16);
+	labelBookingId.setFont(labelFont);
+	labelFlightId.setFont(labelFont);
+	labelDeparture.setFont(labelFont);
+	labelDestination.setFont(labelFont);
+	labelDate.setFont(labelFont);
+	labelCost.setFont(labelFont);
+
+    // Set bounds for labels
+    labelBookingId.setBounds(100, 120, 200, 25);
+    labelFlightId.setBounds(350, 120, 200, 25);
+    labelDeparture.setBounds(100, 170, 200, 25);
+    labelDestination.setBounds(350, 170, 200, 25);
+    labelDate.setBounds(100, 220, 200, 25);
+    labelCost.setBounds(350, 220, 200, 25);
+
+
+    // Add labels to the frame
+    bookframe.add(labelBookingId);
+    bookframe.add(labelFlightId);
+    bookframe.add(labelDeparture);
+    bookframe.add(labelDestination);
+    bookframe.add(labelDate);
+    bookframe.add(labelCost);
+
+    hasBookedFlights = true;
 }
 
-                    // Center the frame on the screen
-                    frame.setLocationRelativeTo(null);
+// Add the Cancel button
+if (hasBookedFlights) {
+    JButton cancelButton = new JButton("Cancel Booking");
+    cancelButton.setBounds(210, 280, 150, 30);
+    cancelButton.setBackground(new Color(115, 147, 179));
+    cancelButton.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            int selectedBookingId = Integer.parseInt(JOptionPane.showInputDialog(bookframe, "Enter Booking ID to cancel:"));
 
-                    // Set the frame visibility to true
-                    frame.setVisible(true);
+            // Implement the cancel booking logic (you may want to verify the booking ID)
+            if (cancelBooking(selectedBookingId)) {
+                JOptionPane.showMessageDialog(bookframe, "Booking canceled successfully.");
+                bookframe.dispose();
+            } else {
+                JOptionPane.showMessageDialog(bookframe, "Please input the correct Book ID and try again.");
+            }
+        }
+    });
+       cancelButton.addMouseListener(new java.awt.event.MouseAdapter() {
+        public void mouseEntered(java.awt.event.MouseEvent evt) {
+            cancelButton.setBackground(new Color(255, 99, 71)); // Hover color
+        }
+
+        public void mouseExited(java.awt.event.MouseEvent evt) {
+            cancelButton.setBackground(new Color(115, 147, 179));
+        }
+    });
+
+
+    // Add Cancel button to the frame
+    bookframe.add(cancelButton);
+} else {
+    // If no booked flights, display a message using JOptionPane
+    JOptionPane.showMessageDialog(bookframe, "No booked flights found.", "No Bookings", JOptionPane.INFORMATION_MESSAGE);
+    bookframe.dispose();
+}
+
+// Center the frame on the screen
+bookframe.setLocationRelativeTo(null);
+
+// Set the frame visibility to true
+bookframe.setVisible(true);
                 }
             }
         }
@@ -305,16 +351,16 @@ public static void main(String[] args) {
 
 
         //color of the labels
-        lastnLabel.setForeground(Color.WHITE);
-    	firstnLabel.setForeground(Color.WHITE);
-    	addressLabel.setForeground(Color.WHITE);
-    	contactLabel.setForeground(Color.WHITE);
-    	emailLabel.setForeground(Color.WHITE);
-    	passwordLabel.setForeground(Color.WHITE);
-    	confirmPasswordLabel.setForeground(Color.WHITE);
-    	genderLabel.setForeground(Color.WHITE);
-    	ageLabel.setForeground(Color.WHITE);
-    	birthdateLabel.setForeground(Color.WHITE);
+        lastnLabel.setForeground(Color.BLACK);
+    	firstnLabel.setForeground(Color.BLACK);
+    	addressLabel.setForeground(Color.BLACK);
+    	contactLabel.setForeground(Color.BLACK);
+    	emailLabel.setForeground(Color.BLACK);
+    	passwordLabel.setForeground(Color.BLACK);
+    	confirmPasswordLabel.setForeground(Color.BLACK);
+    	genderLabel.setForeground(Color.BLACK);
+    	ageLabel.setForeground(Color.BLACK);
+    	birthdateLabel.setForeground(Color.BLACK);
 
 
         JTextField lastnTextField = new JTextField();
@@ -515,7 +561,7 @@ public static void main(String[] args) {
 //HOVER EFFECT ON BUTTONS
 registerButton.addMouseListener(new java.awt.event.MouseAdapter() {
     public void mouseEntered(java.awt.event.MouseEvent evt) {
-        registerButton.setBackground(new Color(70, 130, 180)); // Hover color
+        registerButton.setBackground(new Color(13,146,118)); // Hover color
     }
 
     public void mouseExited(java.awt.event.MouseEvent evt) {
@@ -558,7 +604,7 @@ cancelButton.addMouseListener(new java.awt.event.MouseAdapter() {
     departureComboBox.setBackground(new Color(150, 222, 209));
     toLabel.setBounds(275, 90, 50, 25);
     destinationComboBox.setBounds(300, 80, 100, 45);
-   destinationComboBox.setBackground(new Color(167, 199, 231));
+   	destinationComboBox.setBackground(new Color(255, 246,233));
 
     searchButton.setBounds(180, 160, 150, 50);
 
@@ -597,7 +643,7 @@ cancelButton.addMouseListener(new java.awt.event.MouseAdapter() {
 });
 searchButton.addMouseListener(new java.awt.event.MouseAdapter() {
     public void mouseEntered(java.awt.event.MouseEvent evt) {
-        searchButton.setBackground(new Color(70, 130, 180)); // Hover color
+        searchButton.setBackground(new Color(13,146,118)); // Hover color
     }
 
     public void mouseExited(java.awt.event.MouseEvent evt) {
@@ -735,7 +781,7 @@ private void displayFlights(String departure, String destination) {
 });
  proceedButton.addMouseListener(new java.awt.event.MouseAdapter() {
     public void mouseEntered(java.awt.event.MouseEvent evt) {
-        proceedButton.setBackground(new Color(70, 130, 180)); // Hover color
+        proceedButton.setBackground(new Color(13,146,118)); // Hover color
     }
 
     public void mouseExited(java.awt.event.MouseEvent evt) {
@@ -950,7 +996,7 @@ loginButton.addActionListener(new ActionListener() {
 });
 loginButton.addMouseListener(new java.awt.event.MouseAdapter() {
     public void mouseEntered(java.awt.event.MouseEvent evt) {
-        loginButton.setBackground(new Color(70, 130, 180)); // Hover color
+        loginButton.setBackground(new Color(13,146,118)); // Hover color
     }
 
     public void mouseExited(java.awt.event.MouseEvent evt) {
@@ -1085,7 +1131,7 @@ private void editUserProfile(String[] userInfo) {
     contactLabel.setBounds(100,140, 165, 25);
     emailLabel.setBounds(100,170, 165, 25);
     genderLabel.setBounds(100,200, 165, 25);
-    ageLabel.setBounds(100, 260, 165, 25);
+   	ageLabel.setBounds(100, 260, 165, 25);
     birthdateLabel.setBounds(100, 230, 165, 25);
     lastNameField.setBounds(180, 50, 165, 25);
     firstNameField.setBounds(180, 80, 165, 25);
