@@ -20,14 +20,34 @@ public class projectgroup4 {
     private JButton profile;
     private JButton logout;
     private String loggedInUserEmail;
+    private Connection connection;
 
 public static void main(String[] args) {
     SwingUtilities.invokeLater(() -> new projectgroup4().showHomePage());
 }
 
+private boolean makePayment(int bookingId, Connection connection) {
+    try {
+        if (connection != null && !connection.isClosed()) {
+            String updateQuery = "UPDATE bookings SET is_paid = true WHERE booking_id = ?";
+            try (PreparedStatement updateStatement = connection.prepareStatement(updateQuery)) {
+                updateStatement.setInt(1, bookingId);
+                int rowsUpdated = updateStatement.executeUpdate();
+                return rowsUpdated > 0;
+            }
+        } else {
+            System.err.println("Error: Connection is null or closed in makePayment method");
+            return false;
+        }
+    } catch (SQLException ex) {
+        ex.printStackTrace();
+        return false;
+    }
+}
 
 	//BOOKINGS
-    private void showUserBookings(String userEmail) {
+private void showUserBookings(String userEmail) {
+	JFrame bookframe = new JFrame("User Bookings");
     try {
         String url = "jdbc:mysql://localhost:3306/mydb";
         String username = "root";
@@ -40,99 +60,158 @@ public static void main(String[] args) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(selectQuery)) {
                 preparedStatement.setString(1, userEmail);
 
+
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     // Create a new JFrame to display user bookings
 
-                    JFrame bookframe = new JFrame("User Bookings");
-					bookframe.setSize(600, 400);
-					bookframe.getContentPane().setBackground(new Color(140,216,255));
+                    bookframe.setSize(600, 400);
+                    bookframe.getContentPane().setBackground(new Color(140, 216, 255));
+                    bookframe.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                    bookframe.setLayout(null); // Set layout to null for manual positioning
 
-					bookframe.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-					bookframe.setLayout(null); // Set layout to null for manual positioning
+                    // Create a JLabel to display the title
+                    JLabel titleLabel = new JLabel("Your Bookings:");
+                    titleLabel.setForeground(new Color(1, 11, 19));
+                    Font titleFont = new Font("Castellar", Font.BOLD, 16);
+                    titleLabel.setFont(titleFont);
+                    titleLabel.setBounds(200, 40, 200, 85);
+                    bookframe.add(titleLabel);
 
-					// Create a JLabel to display the title
-					JLabel titleLabel = new JLabel("Your Bookings:");
-					titleLabel.setForeground(new Color(1,11,19));
-					Font titleFont = new Font("Castellar", Font.BOLD, 16);
-					titleLabel.setFont(titleFont);
-					titleLabel.setBounds(200, 40, 200, 85);
-					bookframe.add(titleLabel);
-
-					boolean hasBookedFlights = false;
-
-					while (resultSet.next()) {
-
-    					int bookingId = resultSet.getInt("booking_id");
-    					String flightId = resultSet.getString("flight_id");
-    					String departure = resultSet.getString("departure_location");
-    					String destination = resultSet.getString("destination_location");
-    					String date = resultSet.getString("flight_date");
-    					String cost = resultSet.getString("cost");
-
-    // Display booking information in labels
-    JLabel labelBookingId = new JLabel("Booking ID: " + bookingId);
-    JLabel labelFlightId = new JLabel("Flight ID: " + flightId);
-    JLabel labelDeparture = new JLabel("Departure: " + departure);
-    JLabel labelDestination = new JLabel("Destination: " + destination);
-    JLabel labelDate = new JLabel("Date: " + date);
-    JLabel labelCost = new JLabel("Cost: " + cost);
-
-    labelBookingId.setForeground(new Color(15,135,195));
-	labelFlightId.setForeground(new Color(15,135,195));
-	labelDeparture.setForeground(new Color(15,135,195));
-	labelDestination.setForeground(new Color(15,135,195));
-	labelDate.setForeground(new Color(15,135,195));
-	labelCost.setForeground(new Color(15,135,195));
-
-	// Set font for labels
-	Font labelFont = new Font("Berlin Sans FB Demi", Font.PLAIN, 16);
-	labelBookingId.setFont(labelFont);
-	labelFlightId.setFont(labelFont);
-	labelDeparture.setFont(labelFont);
-	labelDestination.setFont(labelFont);
-	labelDate.setFont(labelFont);
-	labelCost.setFont(labelFont);
-
-    // Set bounds for labels
-    labelBookingId.setBounds(100, 120, 200, 25);
-    labelFlightId.setBounds(350, 120, 200, 25);
-    labelDeparture.setBounds(100, 170, 200, 25);
-    labelDestination.setBounds(350, 170, 200, 25);
-    labelDate.setBounds(100, 220, 200, 25);
-    labelCost.setBounds(350, 220, 200, 25);
+                    boolean hasBookedFlights = false;
+                    final ResultSet finalResultSet = resultSet;
 
 
-    // Add labels to the frame
-    bookframe.add(labelBookingId);
-    bookframe.add(labelFlightId);
-    bookframe.add(labelDeparture);
-    bookframe.add(labelDestination);
-    bookframe.add(labelDate);
-    bookframe.add(labelCost);
+                    while (resultSet.next()) {
+                        int bookingId = resultSet.getInt("booking_id");
+                        String flightId = resultSet.getString("flight_id");
+                        String departure = resultSet.getString("departure_location");
+                        String destination = resultSet.getString("destination_location");
+                        String date = resultSet.getString("flight_date");
+                        String cost = resultSet.getString("cost");
 
-    hasBookedFlights = true;
-}
+                        // Display booking information in labels
+                        JLabel labelBookingId = new JLabel("Booking ID: " + bookingId);
+                        JLabel labelFlightId = new JLabel("Flight ID: " + flightId);
+                        JLabel labelDeparture = new JLabel("Departure: " + departure);
+                        JLabel labelDestination = new JLabel("Destination: " + destination);
+                        JLabel labelDate = new JLabel("Date: " + date);
+                        JLabel labelCost = new JLabel("Cost: " + cost);
 
-// Add the Cancel button
-if (hasBookedFlights) {
+                        labelBookingId.setForeground(new Color(15, 135, 195));
+                        labelFlightId.setForeground(new Color(15, 135, 195));
+                        labelDeparture.setForeground(new Color(15, 135, 195));
+                        labelDestination.setForeground(new Color(15, 135, 195));
+                        labelDate.setForeground(new Color(15, 135, 195));
+                        labelCost.setForeground(new Color(15, 135, 195));
+
+                        // Set font for labels
+                        Font labelFont = new Font("Berlin Sans FB Demi", Font.PLAIN, 16);
+                        labelBookingId.setFont(labelFont);
+                        labelFlightId.setFont(labelFont);
+                        labelDeparture.setFont(labelFont);
+                        labelDestination.setFont(labelFont);
+                        labelDate.setFont(labelFont);
+                        labelCost.setFont(labelFont);
+
+                        // Set bounds for labels
+                        labelBookingId.setBounds(100, 120, 200, 25);
+                        labelFlightId.setBounds(350, 120, 200, 25);
+                        labelDeparture.setBounds(100, 170, 200, 25);
+                        labelDestination.setBounds(350, 170, 200, 25);
+                        labelDate.setBounds(100, 220, 200, 25);
+                        labelCost.setBounds(350, 220, 200, 25);
+
+                        // Add labels to the frame
+                        bookframe.add(labelBookingId);
+                        bookframe.add(labelFlightId);
+                        bookframe.add(labelDeparture);
+                        bookframe.add(labelDestination);
+                        bookframe.add(labelDate);
+                        bookframe.add(labelCost);
+
+                        boolean isPaid = resultSet.getBoolean("is_paid");
+
+                        // Add label for payment status
+                        JLabel labelPaymentStatus = new JLabel("Paid: " + (isPaid ? "Yes" : "No"));
+						labelPaymentStatus.setForeground(new Color(15, 135, 195));
+						Font paymentStatusFont = new Font("Berlin Sans FB Demi", Font.PLAIN, 16);
+						labelPaymentStatus.setFont(paymentStatusFont);
+						labelPaymentStatus.setBounds(100, 270, 200, 25);
+						bookframe.add(labelPaymentStatus);
+
+                        hasBookedFlights = true;
+                    }
+
+                            // Add the Pay button
+       if (hasBookedFlights) {
+    JButton payButton = new JButton("Pay");
+    payButton.setBounds(150, 320, 150, 30);
+    payButton.setBackground(new Color(50, 205, 50)); // Green color
+    payButton.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            try {
+                int selectedBookingId = Integer.parseInt(JOptionPane.showInputDialog(bookframe, "Enter Booking ID to make payment:"));
+
+                // Ensure to pass the correct parameters to makePayment method
+                if (makePayment(selectedBookingId, connection)) {
+                    JOptionPane.showMessageDialog(bookframe, "Payment successful. Thank you!");
+                    // You might want to update payment status labels or take other actions here
+                } else {
+                    JOptionPane.showMessageDialog(bookframe, "Please input the correct Book ID and try again.");
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(bookframe, "Error processing payment. Please try again later.");
+            }
+        }
+    });
+
+            payButton.addMouseListener(new java.awt.event.MouseAdapter() {
+                public void mouseEntered(java.awt.event.MouseEvent evt) {
+                    payButton.setBackground(new Color(0, 128, 0)); // Dark green hover color
+                }
+
+                public void mouseExited(java.awt.event.MouseEvent evt) {
+                    payButton.setBackground(new Color(50, 205, 50));
+                }
+            });
+
+            // Add Pay button to the frame
+            bookframe.add(payButton);
+        } else {
+            // If no booked flights, display a message using JOptionPane
+            JOptionPane.showMessageDialog(bookframe, "No booked flights found.", "No Bookings", JOptionPane.INFORMATION_MESSAGE);
+            bookframe.dispose();
+        }
+
+		// Add the Cancel button
+			if (hasBookedFlights) {
     JButton cancelButton = new JButton("Cancel Booking");
-    cancelButton.setBounds(210, 280, 150, 30);
+    cancelButton.setBounds(310, 320, 150, 30);
     cancelButton.setBackground(new Color(115, 147, 179));
     cancelButton.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            int selectedBookingId = Integer.parseInt(JOptionPane.showInputDialog(bookframe, "Enter Booking ID to cancel:"));
+            try {
+                int selectedBookingId = Integer.parseInt(JOptionPane.showInputDialog(bookframe, "Enter Booking ID to cancel:"));
 
-            // Implement the cancel booking logic (you may want to verify the booking ID)
-            if (cancelBooking(selectedBookingId)) {
-                JOptionPane.showMessageDialog(bookframe, "Booking canceled successfully.");
-                bookframe.dispose();
-            } else {
-                JOptionPane.showMessageDialog(bookframe, "Please input the correct Book ID and try again.");
+                // Implement the cancel booking logic (you may want to verify the booking ID)
+                if (cancelBooking(selectedBookingId)) {
+                    JOptionPane.showMessageDialog(bookframe, "Booking canceled successfully.");
+                    bookframe.dispose();
+                } else {
+                    JOptionPane.showMessageDialog(bookframe, "Please input the correct Book ID and try again.");
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                // Handle the exception or display an error message as needed
+                JOptionPane.showMessageDialog(bookframe, "Error processing cancellation. Please try again later.");
             }
         }
     });
-       cancelButton.addMouseListener(new java.awt.event.MouseAdapter() {
+
+    cancelButton.addMouseListener(new java.awt.event.MouseAdapter() {
         public void mouseEntered(java.awt.event.MouseEvent evt) {
             cancelButton.setBackground(new Color(255, 99, 71)); // Hover color
         }
@@ -142,20 +221,25 @@ if (hasBookedFlights) {
         }
     });
 
+    // Add Cancel button to the frame
+    bookframe.add(cancelButton);
+// Add Cancel button to the frame
+bookframe.add(cancelButton);
+
 
     // Add Cancel button to the frame
     bookframe.add(cancelButton);
-} else {
-    // If no booked flights, display a message using JOptionPane
-    JOptionPane.showMessageDialog(bookframe, "No booked flights found.", "No Bookings", JOptionPane.INFORMATION_MESSAGE);
-    bookframe.dispose();
-}
+                    } else {
+                        // If no booked flights, display a message using JOptionPane
+                        JOptionPane.showMessageDialog(bookframe, "No booked flights found.", "No Bookings", JOptionPane.INFORMATION_MESSAGE);
+                        bookframe.dispose();
+                    }
 
-// Center the frame on the screen
-bookframe.setLocationRelativeTo(null);
+                    // Center the frame on the screen
+                    bookframe.setLocationRelativeTo(null);
 
-// Set the frame visibility to true
-bookframe.setVisible(true);
+                    // Set the frame visibility to true
+                    bookframe.setVisible(true);
                 }
             }
         }
@@ -163,6 +247,7 @@ bookframe.setVisible(true);
         e.printStackTrace();
     }
 }
+
 
 
 	//HOME PAGE
@@ -1298,6 +1383,8 @@ private boolean deleteUserAccount(String email) {
 
     return false; // Deletion failed
 }
+
+
 
 private String[] getUserInfo(String email) {
     String[] userInfo = new String[9];
