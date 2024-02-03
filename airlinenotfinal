@@ -21,6 +21,8 @@ public class projectgroup4 {
     private JButton logout;
     private String loggedInUserEmail;
     private Connection connection;
+    private JButton registerButton;
+
 
 public static void main(String[] args) {
     SwingUtilities.invokeLater(() -> new projectgroup4().showHomePage());
@@ -229,6 +231,7 @@ bookframe.add(cancelButton);
 
     // Add Cancel button to the frame
     bookframe.add(cancelButton);
+                    
                     } else {
                         // If no booked flights, display a message using JOptionPane
                         JOptionPane.showMessageDialog(bookframe, "No booked flights found.", "No Bookings", JOptionPane.INFORMATION_MESSAGE);
@@ -255,7 +258,7 @@ bookframe.add(cancelButton);
     // Main/Home Frame
     homeFrame = new JFrame("Airline Booking System");
 
-    JButton registerButton = new JButton("Register");
+    registerButton = new JButton("Register");
     JButton loginButton = new JButton("Login");
     JButton flightsButton = new JButton("Flights");
     JButton bookings = new JButton("Bookings");
@@ -290,7 +293,7 @@ bookframe.add(cancelButton);
     Font labelFont = new Font("Script MT Bold", Font.BOLD, 50);
     mainTextLabel.setFont(labelFont);
 
-    mainTextLabel.setForeground(Color.WHITE); // title color
+    mainTextLabel.setForeground(Color.BLACK); // title color
 
     JLabel servicesText = new JLabel("<html><p style='text-align: center; font-size: 18px;'>Explore Our Services!<br/>"
             + "Book your flights with ease and explore amazing destinations with Nigga Airlines. "
@@ -298,7 +301,7 @@ bookframe.add(cancelButton);
     servicesText.setForeground(Color.BLACK);
     Font servicesFont = new Font("Sitka Heading", Font.BOLD, 11);
     servicesText.setFont(servicesFont);
-    servicesText.setForeground(Color.WHITE);
+    servicesText.setForeground(Color.BLACK);
 
     ImageIcon backgroundImage = new ImageIcon("C:/Users/Ravz/Documents/JCreator LE/MyProjects/projectgroup4/air1.jpg");
     JLabel backgroundLabel = new JLabel(backgroundImage);
@@ -336,19 +339,21 @@ bookframe.add(cancelButton);
 
     homeFrame.setVisible(true);
 
-        // Registration button functions and frame
-        registerButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent a) {
-                showRegistrationForm();
-            }
-        });
-		// Login button
-        loginButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent a) {
-                showLoginPage();
-            }
-        });
 
+            // Registration button functions and frame
+    registerButton.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent a) {
+            showRegistrationForm();
+
+        }
+    });
+
+    // Login button
+    loginButton.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent a) {
+            showLoginPage();
+        }
+    });
 		//logout button
         logout.addActionListener(new ActionListener() {
     public void actionPerformed(ActionEvent e) {
@@ -419,7 +424,15 @@ bookframe.add(cancelButton);
 	//REGISTER
     private void showRegistrationForm() {
         JFrame registrationFrame = new JFrame("Register");
-        registrationFrame.getContentPane().setBackground(new Color(140,216,255));
+        // Set background color for the frame
+         ImageIcon backgroundImage = new ImageIcon("C:/Users/Ravz/Documents/JCreator LE/MyProjects/projectgroup4/weewoo.jpg");
+
+        // Set layout manager for the frame
+        registrationFrame.setContentPane(new JLabel(backgroundImage));
+
+        // Set layout manager for the frame
+        registrationFrame.setLayout(new BorderLayout());
+
 
         // Registration Form Components
         JLabel lastnLabel = new JLabel("Lastname:");
@@ -523,6 +536,11 @@ bookframe.add(cancelButton);
     	registrationFrame.add(ageTextField);
         registrationFrame.add(registerButton);
         registrationFrame.add(cancelButton);
+
+        if (isLoggedIn) {
+    	registerButton.setEnabled(false); // Disable the login button
+
+}
 
         contactTextField.addKeyListener(new KeyAdapter() {
         	public void keyPressed(KeyEvent e) {
@@ -670,7 +688,15 @@ cancelButton.addMouseListener(new java.awt.event.MouseAdapter() {
     //FLIGHTS
      private void showFlightsTable() {
     JFrame flightsFrame = new JFrame("Available Flights");
-    flightsFrame.getContentPane().setBackground(new Color(140,216,255));
+     // Set background color for the frame
+         ImageIcon backgroundImage = new ImageIcon("C:/Users/Ravz/Documents/JCreator LE/MyProjects/projectgroup4/weewoo.jpg");
+
+        // Set layout manager for the frame
+        flightsFrame.setContentPane(new JLabel(backgroundImage));
+
+        // Set layout manager for the frame
+        flightsFrame.setLayout(new BorderLayout());
+
 
     String[] locations = {"Manila", "Cebu", "Batanes", "Bicol", "Pampanga", "Davao", "Palawan", "Iloilo", "Boracay", "Leyte", "Mindoro", "Cagayan de Oro", "Laoag", "Zamboanga", "GenSan", "Surigao", "Siargao", "Tawi-Tawi", "Tacloban", "Virac"};
 
@@ -771,7 +797,10 @@ private void showAboutUsDialog() {
         JFrame aboutUsFrame = new JFrame("About Us");
 
         // Set background color for the frame
-        aboutUsFrame.getContentPane().setBackground(new Color(140, 216, 255));
+         ImageIcon backgroundImage = new ImageIcon("C:/Users/Ravz/Documents/JCreator LE/MyProjects/projectgroup4/weewoo.jpg");
+
+        // Set layout manager for the frame
+        aboutUsFrame.setContentPane(new JLabel(backgroundImage));
 
         // Set layout manager for the frame
         aboutUsFrame.setLayout(new BorderLayout());
@@ -855,7 +884,6 @@ private void displayFlights(String departure, String destination) {
         String date = (String) flightsTable.getValueAt(selectedRow, 3);
         String cost = (String) flightsTable.getValueAt(selectedRow, 4);
 
-        // Assuming loggedInUserEmail is already set when the user logs in
         if (userHasBooking(loggedInUserEmail, flightId, departure, destination, date, cost)) {
             JOptionPane.showMessageDialog(flightsInfoFrame, "Booking successful!");
             flightsInfoFrame.dispose(); // Close the current frame (Selected Flights)
@@ -974,12 +1002,25 @@ private List<String[]> fetchFlightsFromDatabase(String departure, String destina
     private void updateProfileButtonState() {
     profile.setEnabled(isLoggedIn); //profile
     logout.setEnabled(isLoggedIn); //logout
+    if(isLoggedIn){
+    	registerButton.setEnabled(false);
+    }else{
+    	registerButton.setEnabled(true);
+    }
+
 }
 
  //Login codes
     private void showLoginPage() {
         JFrame loginFrame = new JFrame("Login");
-        loginFrame.getContentPane().setBackground(new Color(140,216,255));
+        // Set background color for the frame
+         ImageIcon backgroundImage = new ImageIcon("C:/Users/Ravz/Documents/JCreator LE/MyProjects/projectgroup4/weewoo.jpg");
+
+        // Set layout manager for the frame
+        loginFrame.setContentPane(new JLabel(backgroundImage));
+
+        // Set layout manager for the frame
+        loginFrame.setLayout(new BorderLayout());
 
         ImageIcon originalLogo = new ImageIcon("C:/Users/Ravz/Documents/JCreator LE/MyProjects/projectgroup4/login.png");
 
@@ -1040,7 +1081,8 @@ private List<String[]> fetchFlightsFromDatabase(String departure, String destina
 
 
         if (isLoggedIn) {
-    loginButton.setEnabled(false); // Disable the login button
+    	loginButton.setEnabled(false); // Disable the login button
+
 }
 
 // Add action listener for login button
